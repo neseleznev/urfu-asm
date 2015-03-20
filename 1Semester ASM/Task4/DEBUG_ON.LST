@@ -1,0 +1,216 @@
+Turbo Assembler	 Version 3.2	    12/17/14 10:35:30	    Page 1
+DEBUG_ON.asm
+
+
+
+      1				     .286
+      2	0000			     .model tiny
+      3	0000			     .code
+      4				     ORG 100h
+      5
+      6	0100			     start:
+      7	0100  E9 00A6			     jmp	     setup; Перейдем к	программе инсталляции
+      8
+      9				     ;-------------------- Резидентная часть программы	--------------------;
+     10	0103  43 3A 5C 55 73 65	72+  FileName	     db	     'C:\Users\Nikita\Desktop\123.txt',0     ; файл	для записи
+     11	      73 5C 4E 69 6B 69	74+
+     12	      61 5C 44 65 73 6B	74+
+     13	      6F 70 5C 31 32 33	2E+
+     14	      74 78 74 00
+     15	0123  ????		     Handle	     dw	     ?									    +
+     16				     ; Handle файла
+     17	0125  ???? ????		     old_21h dw	     ?,	?
+     18
+     19
+     20	0129			     catch_21h	     PROC    far
+     21	0129  80 FC 09			     cmp     ah, 09h ;Проверим:	это фукция 09h?
+     22	012C  74 0A			     je	 func_09h    ;Если так, то метку func_09h
+     23	012E  80 FC 4C			     cmp     ah, 4ch ;Проверим:	это фукция 4ch?
+     24	0131  74 4E			     je	 func_4ch    ;Если так, то метку func_4ch
+     25	0133  2E: FF 2E	0125r		     jmp dword ptr cs:[old_21h]
+     26					     ;db     0EAh
+     27
+     28
+     29				      ;обработчик
+     30	0138			      func_09h:
+     31	0138  9C				     pushf   ;Сохраним регистр флагов
+     32	0139  60				     pusha   ;Сохраним регистры	общего назначения
+     33
+     34						     ;запоминаем адрес строки
+     35	013A  1E				     push    ds
+     36	013B  52				     push    dx
+     37
+     38						     ;определяем длину строки
+     39	013C  8B F2				     mov	     si, dx  ;адрес начала строки в si
+     40	013E  33 C9				     xor	     cx, cx
+     41	0140  FC				     cld	     ;df = 0 — значение положительное, то  +
+     42				     есть
+     43								     ;просмотр от начала цепочки	к ее	    +
+     44				     концу
+     45
+     46				      ;поиск символа "$"
+     47	0141			      CheckString:
+     48	0141  AC				     lodsb   ;загрузить элемент	из ячейки памяти,	    +
+     49				     адресуемой si в	регистр al.
+     50								     ;Размер элемента для команды lodsb	-   +
+     51				     byte
+     52								     ;изменить значение	регистра si на    +
+     53				     величину, равную длине элемента	цепочки
+     54	0142  41				     inc	     cx
+     55	0143  3C 24				     cmp	     al, '$'
+     56	0145  75 FA				     jnz	     CheckString
+     57	0147  49				     dec	     cx
+Turbo Assembler	 Version 3.2	    12/17/14 10:35:30	    Page 2
+DEBUG_ON.asm
+
+
+
+     58					     ;запоминаем длину строки
+     59	0148  51				     push    cx
+     60					     ;переходим в свой сегмент данных
+     61	0149  0E				     push    cs
+     62	014A  1F				     pop	     ds
+     63					     ;открываем файл для чтения и записи
+     64	014B  B8 3D02				     mov	     ax, 3d02h
+     65	014E  BA 0103r				     mov	     dx, offset	FileName     ;Имя открываемого	    +
+     66				     файла	в DX
+     67					     ;аналог INT 21h
+     68	0151  9C				     pushf
+     69	0152  2E: FF 1E	0125r			     call    dword ptr cs:[old_21h]
+     70					     ;устанавливаем указатель в конец файла
+     71	0157  A3 0123r				     mov	     Handle, ax	     ;сохраним номер файла
+     72	015A  8B D8				     mov	     bx, ax
+     73	015C  B8 4202				     mov	     ax, 4202h	     ;Установим указатель на    +
+     74				     конец	файла
+     75	015F  33 C9				     xor	     cx, cx	     ;Обнулим регистры
+     76	0161  33 D2				     xor	     dx, dx
+     77					     ;аналог INT 21h
+     78	0163  9C				     pushf
+     79	0164  2E: FF 1E	0125r			     call    dword ptr cs:[old_21h]
+     80					     ;запись в файл
+     81	0169  B4 40				     mov	     ah, 40h	     ;Запишем в	файл код	длиной
+     82						     ;mov	     bx, Handle
+     83					     ;восстановим длину	строки и	её адрес
+     84	016B  59				     pop	     cx
+     85	016C  5A				     pop	     dx
+     86	016D  1F				     pop	     ds
+     87					     ;аналог INT 21h
+     88	016E  9C				     pushf
+     89	016F  2E: FF 1E	0125r			     call    dword ptr cs:[old_21h]
+     90					     ;переходим на свой сегмент
+     91	0174  1E				     push    ds
+     92	0175  0E				     push    cs
+     93	0176  1F				     pop	     ds
+     94	0177  B4 3E				     mov	     ah, 3Eh; закрываем фaйл
+     95						     ;MOV	     bx, Handle
+     96					     ;аналог INT 21h
+     97	0179  9C				     pushf
+     98	017A  2E: FF 1E	0125r			     call    dword ptr cs:[old_21h]
+     99	017F  EB 1D				     jmp end_catch
+    100
+    101
+    102				      ;обработчик
+    103	0181			      func_4ch:
+    104	0181  9C				     pushf   ;Сохраним регистр флагов
+    105	0182  60				     pusha   ;Сохраним регистры	общего назначения
+    106	0183  1E				     push    ds
+    107	0184  50				     push    ax
+    108
+    109	0185  FA			     cli
+    110	0186  B8 2521				     mov	     ax, 2521h	     ;Установим новый вектор    +
+    111				     прерывания INT 21h
+    112	0189  BA 0125r				     mov	     dx, offset	old_21h	;offset	catch_21h
+    113	018C  0E				     push cs
+    114	018D  07				     pop es
+Turbo Assembler	 Version 3.2	    12/17/14 10:35:30	    Page 3
+DEBUG_ON.asm
+
+
+
+    115						     ;mov    es, [old_21h + 2]
+    116	018E  9C				     pushf
+    117	018F  2E: FF 1E	0125r			     call    dword ptr cs:[old_21h] ;int	     21h
+    118	0194  FB			     sti
+    119	0195  58				     pop     ax
+    120	0196  9C				     pushf
+    121	0197  2E: FF 1E	0125r			     call    dword ptr cs:[old_21h]
+    122	019C  EB 08				     jmp end_catch2
+    123
+    124	019E			      end_catch:
+    125					     ;восстанавливаем регистры и возвращаемся в	    +
+    126				     старый обработчик
+    127	019E  1F				     pop	     ds
+    128	019F  61				     popa
+    129	01A0  9D				     popf
+    130	01A1  2E: FF 2E	0125r			     jmp	     dword ptr cs:[old_21h]
+    131	01A6			      end_catch2:
+    132					     ;восстанавливаем регистры и возвращаемся в	    +
+    133				     старый обработчик
+    134	01A6  1F				     pop	     ds
+    135	01A7  61				     popa
+    136	01A8  9D				     popf
+    137						     ;jmp	     dword ptr cs:[old_21h]
+    138	01A9			     catch_21h	     endp
+    139				     ;-----------------	Конец резидентной части программы		    +
+    140				     -----------------;
+    141
+    142
+    143	01A9			     setup:
+    144
+    145	01A9  B8 3521				     mov	     ax, 3521h	     ;Определим значение	    +
+    146				     старого вектор INT 21h
+    147	01AC  CD 21				     int	     21h
+    148	01AE  FA			     cli
+    149	01AF  89 1E 0125r			     mov	     [old_21h],	bx;Сохраним его в переменной
+    150	01B3  8C 06 0127r			     mov	     [old_21h +	2], es
+    151	01B7  B8 2521				     mov	     ax, 2521h	     ;Установим новый вектор    +
+    152				     прерывания INT 21h
+    153	01BA  BA 0129r				     mov	     dx, offset	catch_21h
+    154	01BD  CD 21				     int	     21h
+    155	01BF  FB			     sti
+    156					     ;оставить резидентной
+    157	01C0  BA 01A9r				     mov	     dx, offset	setup
+    158	01C3  CD 27				     int	     27h
+    159				     end start
+Turbo Assembler	 Version 3.2	    12/17/14 10:35:30	    Page 4
+Symbol Table
+
+
+
+
+Symbol Name		Type   Value			   Cref	(defined at #)
+
+??DATE			Text   "12/17/14"
+??FILENAME		Text   "DEBUG_ON"
+??TIME			Text   "10:35:30"
+??VERSION		Number 0314
+@32BIT			Text   0			   #2
+@CODE			Text   DGROUP			   #2
+@CODESIZE		Text   0			   #2
+@CPU			Text   0707H			   #1
+@CURSEG			Text   _TEXT			   #3
+@DATA			Text   DGROUP			   #2
+@DATASIZE		Text   0			   #2
+@FILENAME		Text   DEBUG_ON
+@INTERFACE		Text   00H			   #2
+@MODEL			Text   1			   #2
+@STACK			Text   DGROUP			   #2
+@WORDSIZE		Text   2			   #1  #3
+CATCH_21H		Far    DGROUP:0129		   #20	153
+CHECKSTRING		Near   DGROUP:0141		   #47	56
+END_CATCH		Near   DGROUP:019E		   99  #124
+END_CATCH2		Near   DGROUP:01A6		   122	#131
+FILENAME		Byte   DGROUP:0103		   #10	65
+FUNC_09H		Near   DGROUP:0138		   22  #30
+FUNC_4CH		Near   DGROUP:0181		   24  #103
+HANDLE			Word   DGROUP:0123		   #15	71
+OLD_21H			Word   DGROUP:0125		   #17	25  69	79  89	98  112	 117  121  130	149  150
+SETUP			Near   DGROUP:01A9		   7  #143  157
+START			Near   DGROUP:0100		   #6  159
+
+Groups & Segments	Bit Size Align	Combine	Class	   Cref	(defined at #)
+
+DGROUP			Group				   #2  2
+  _DATA			16  0000 Word	Public	DATA	   #2
+  _TEXT			16  01C5 Word	Public	CODE	   #2  #3
+

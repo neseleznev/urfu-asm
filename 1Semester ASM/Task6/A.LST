@@ -1,0 +1,602 @@
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 1
+a.asm
+
+
+
+      1					 .386
+      2					 assume	CS:cseg, DS:dseg, SS:sseg
+      3
+      4	    0000			 sseg segment stack use16
+      5	    0000  0100*(??)			 db 256	dup (?)
+      6	    0100			 sseg ends
+      7
+      8	    0000			 dseg segment use16
+      9	    0000  24				 max_len  db 36
+     10	    0001  00				 string_len db 0
+     11	    0002  10*(??)			 string	db 16 dup (?)
+     12
+     13	    0012  ????				 hFile dw ?
+     14	    0014  21*(00)			 fin db	33 dup(0)
+     15	    0035  21*(00) 00			 fout db 33 dup(0), 0h
+     16	    0057  ????				 buf_len dw ?
+     17	    0059  41*(00)			 buf db	65 dup(0)
+     18	    009A  C8*(00)			 ans db	200 dup(0)
+     19	    0162  ????				 ans_len dw ?
+     20	    0164  45 52	52 4F 52 0D 0A+		 Message db 'ERROR',13,10,'$'
+     21		  24
+     22	    016C			 dseg ends
+     23
+     24	    0000			 cseg segment use16
+     25
+     26					 include SexyPrnt.inc
+1    27					 ; v 1.0
+1    28
+1    29	    0000			 print_space proc
+1    30	    0000  50				 push	 ax
+1    31	    0001  52				 push	 dx
+1    32
+1    33	    0002  BA 0020			 mov	 dx, 20h
+1    34	    0005  B8 0200			 mov	 ax, 0200h
+1    35	    0008  CD 21				 int	 21h
+1    36
+1    37	    000A  5A				 pop	 dx
+1    38	    000B  58				 pop	 ax
+1    39	    000C  C3				 ret
+1    40	    000D			 print_space endp
+1    41
+1    42	    000D			 print_backspace proc
+1    43
+1    44	    000D  50				 push	 ax
+1    45	    000E  52				 push	 dx
+1    46
+1    47	    000F  BA 0008			 mov	 dx, 08h
+1    48	    0012  B8 0200			 mov	 ax, 0200h
+1    49	    0015  CD 21				 int	 21h
+1    50
+1    51	    0017  5A				 pop	 dx
+1    52	    0018  58				 pop	 ax
+1    53	    0019  C3				 ret
+1    54	    001A			 print_backspace endp
+1    55
+1    56	    001A			 print_comma proc
+1    57
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 2
+a.asm
+
+
+
+1    58	    001A  50				 push	 ax
+1    59	    001B  52				 push	 dx
+1    60
+1    61	    001C  BA 002C			 mov	 dx, 2Ch
+1    62	    001F  B8 0200			 mov	 ax, 0200h
+1    63	    0022  CD 21				 int	 21h
+1    64
+1    65	    0024  5A				 pop	 dx
+1    66	    0025  58				 pop	 ax
+1    67	    0026  C3				 ret
+1    68	    0027			 print_comma endp
+1    69
+1    70	    0027			 CRLF proc
+1    71
+1    72	    0027  50				 push	 ax
+1    73	    0028  52				 push	 dx
+1    74
+1    75	    0029  BA 000D			 mov	 dx, 13
+1    76	    002C  B8 0200			 mov	 ax, 0200h
+1    77	    002F  CD 21				 int	 21h
+1    78	    0031  BA 000A			 mov	 dx, 10
+1    79	    0034  B8 0200			 mov	 ax, 0200h
+1    80	    0037  CD 21				 int	 21h
+1    81
+1    82	    0039  5A				 pop	 dx
+1    83	    003A  58				 pop	 ax
+1    84	    003B  C3				 ret
+1    85	    003C			 CRLF endp
+1    86
+1    87	    003C			 print_open_bracket proc
+1    88
+1    89	    003C  50				 push	 ax
+1    90	    003D  52				 push	 dx
+1    91
+1    92	    003E  BA 005B			 mov	 dx, 5Bh
+1    93	    0041  B8 0200			 mov	 ax, 0200h
+1    94	    0044  CD 21				 int	 21h
+1    95
+1    96	    0046  5A				 pop	 dx
+1    97	    0047  58				 pop	 ax
+1    98	    0048  C3				 ret
+1    99	    0049			 print_open_bracket endp
+1   100
+1   101	    0049			 print_close_bracket proc
+1   102
+1   103	    0049  50				 push	 ax
+1   104	    004A  52				 push	 dx
+1   105
+1   106	    004B  BA 005D			 mov	 dx, 5Dh
+1   107	    004E  B8 0200			 mov	 ax, 0200h
+1   108	    0051  CD 21				 int	 21h
+1   109
+1   110	    0053  5A				 pop	 dx
+1   111	    0054  58				 pop	 ax
+1   112	    0055  C3				 ret
+1   113	    0056			 print_close_bracket endp
+1   114
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 3
+a.asm
+
+
+
+1   115
+    116					 include IntLib.inc
+1   117					 ;requires include SexyPrnt.inc
+1   118
+1   119	    0056			 read_int2 proc
+1   120	    0056  53				 push	 bx
+1   121	    0057  51				 push	 cx
+1   122	    0058  52				 push	 dx
+1   123
+1   124						 local	 temp:word ; локальная	переменная
+1   125	    0059  33 C0				 xor	 ax, ax	   ; ax	= 0 для символов
+1   126	    005B  33 DB				 xor	 bx, bx	   ; bx	= 0 для знака
+1   127	    005D  CD 16				 int	 16h	   ; getch
+1   128	    005F  32 E4				 xor	 ah, ah
+1   129	    0061  3C 2D				 cmp	 al, 45	   ; char '-'
+1   130	    0063  74 0A				 je	 negative
+1   131	    0065  EB 00				 jmp	 positive
+1   132	    0067			  positive:
+1   133	    0067  2D 0030			 sub	 ax, 48
+1   134	    006A  89 46	FE			 mov	 temp, ax
+1   135	    006D  EB 1B				 jmp	 big_int
+1   136	    006F			  negative:
+1   137	    006F  BB 0001			 mov	 bx, 1
+1   138	    0072  C7 46	FE 0000			 mov	 temp, 0
+1   139	    0077  EB 11				 jmp	 big_int
+1   140	    0079			  end_loop:
+1   141	    0079  83 FB	01			 cmp	 bx, 1
+1   142	    007C  74 05				 je	 negative_1
+1   143	    007E  8B 46	FE			 mov	 ax, temp
+1   144	    0081  EB 2F				 jmp	 end_all
+1   145	    0083			  negative_1:
+1   146	    0083  8B 46	FE			 mov	 ax, temp
+1   147	    0086  F7 D8				 neg	 ax
+1   148	    0088  EB 28				 jmp	 end_all
+1   149	    008A			  big_int:
+1   150	    008A  B8 0000			 mov	 ax, 0
+1   151	    008D  CD 16				 int	 16h	 ; getch
+1   152	    008F  32 E4				 xor	 ah, ah
+1   153						 ;mov dx, ax
+1   154						 ;int 21h
+1   155	    0091  2D 0030			 sub	 ax, 48
+1   156	    0094  B9 0009			 mov	 cx, 9
+1   157	    0097  3B C1				 cmp	 ax, cx
+1   158	    0099  7F DE				 jg	 end_loop
+1   159	    009B  B9 0000			 mov	 cx, 0
+1   160	    009E  3B C1				 cmp	 ax, cx
+1   161	    00A0  7C D7				 jl	 end_loop
+1   162
+1   163	    00A2  8B 4E	FE			 mov	 cx, temp
+1   164	    00A5  6B C9	0A			 imul	 cx, 10
+1   165	    00A8  03 C8				 add	 cx, ax
+1   166	    00AA  89 4E	FE			 mov	 temp, cx
+1   167						 ;   mov cx, ax
+1   168						 ;   mov ax, temp
+1   169						 ;   mov bx, 10
+1   170						 ;   imul bx
+1   171						 ;   add ax, cx
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 4
+a.asm
+
+
+
+1   172						 ;   mov temp, ax
+1   173	    00AD  8B 46	FE			 mov	 ax, temp
+1   174	    00B0  EB D8				 jmp	 big_int
+1   175	    00B2			  end_all:
+1   176	    00B2  5A				 pop	 dx
+1   177	    00B3  59				 pop	 cx
+1   178	    00B4  5B				 pop	 bx
+1   179	    00B5  C3				 ret
+1   180	    00B6			 read_int2 endp
+1   181
+1   182					 ; read_int2_array proc
+1   183
+1   184					 ;	   call	print_open_bracket
+1   185					 ;	   xor	si, si		; Обнуляем счетчик
+1   186					 ;	   reading_cycle:
+1   187					 ;	       call read_int2
+1   188					 ;	       mov  array[si], ax
+1   189					 ;	       add  si,	2
+1   190					 ;	       call print_int2
+1   191					 ;	       call print_comma
+1   192					 ;	       call print_space
+1   193					 ;	       mov  ax,	len
+1   194					 ;	       shl  ax,	1
+1   195					 ;	       cmp  si,	ax
+1   196					 ;	       jl   reading_cycle
+1   197					 ;	   call	print_backspace
+1   198					 ;	   call	print_backspace
+1   199					 ;	   call	print_close_bracket
+1   200					 ;	   call	CRLF
+1   201
+1   202					 ;	   ret
+1   203					 ;	 ; push	 bp
+1   204					 ;	 ; push	 ax
+1   205					 ;	 ; push	 bx
+1   206					 ;	 ; ; total 6
+1   207
+1   208					 ;	 ; mov	 bp, sp
+1   209					 ;	 ; mov	 si, [bp+10]   ; array
+1   210					 ;	 ; mov	 bx, [bp+8]    ; len
+1   211					 ;	 ; shl	 bx, 1	       ; *size(int) = 2
+1   212					 ;	 ; add	 bx, si	       ; +first	addr
+1   213
+1   214					 ;	 ;	 mov ax,si
+1   215					 ;	 ;	 call print_int2
+1   216					 ;	 ;	 call print_space
+1   217					 ;	 ;	 mov ax,bx
+1   218					 ;	 ;	 call print_int2
+1   219					 ;	 ;	 call print_space
+1   220					 ;	 ; cmp	   si, bx
+1   221					 ;	 ; je	   RA_array_is_empty
+1   222
+1   223					 ;	 ; call	 print_open_bracket
+1   224					 ;  ; RA_read_loop:
+1   225
+1   226					 ;	 ;	 mov ax,si
+1   227					 ;	 ;	 call print_int2
+1   228					 ;	 ;	 call print_space
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 5
+a.asm
+
+
+
+1   229					 ;	 ;	 mov ax,bx
+1   230					 ;	 ;	 call print_int2
+1   231					 ;	 ;	 call print_space
+1   232					 ;	 ; call	 read_int2
+1   233					 ;	 ; mov	 si, ax
+1   234					 ;	 ; call	 print_int2
+1   235					 ;	 ; call	 print_comma
+1   236					 ;	 ; call	 print_space
+1   237
+1   238					 ;	 ; add	   si, 2
+1   239					 ;	 ; cmp	   si, bx
+1   240					 ;	 ; je	   RA_print_end
+1   241					 ;	 ; jmp	   RA_read_loop
+1   242
+1   243					 ;  ; RA_print_end:
+1   244					 ;  ;	 call	 print_backspace
+1   245					 ;  ;	 call	 print_backspace
+1   246					 ;	 ; call	 print_close_bracket
+1   247					 ;	 ; call	 CRLF
+1   248					 ;	 ; jmp	 RA_end
+1   249
+1   250					 ;  ; RA_array_is_empty:
+1   251					 ;  ;	 call	 print_open_bracket
+1   252					 ;	 ; call	 print_close_bracket
+1   253					 ;	 ; call	 CRLF
+1   254					 ;	 ; jmp	 RA_end
+1   255
+1   256					 ;  ; RA_end:
+1   257					 ;	 ; pop	 bx
+1   258					 ;	 ; pop	 ax
+1   259					 ;	 ; pop	 bp
+1   260					 ;	 ; ret
+1   261					 ; read_int2_array endp
+1   262
+1   263	    00B6			 print_int2 proc
+1   264	    00B6  50				 push	 ax
+1   265	    00B7  53				 push	 bx
+1   266	    00B8  51				 push	 cx
+1   267	    00B9  52				 push	 dx
+1   268
+1   269	    00BA  85 C0				 test	 ax, ax
+1   270	    00BC  79 0C				 jns	 oi1
+1   271
+1   272	    00BE  8B C8				 mov	 cx, ax
+1   273	    00C0  B4 02				 mov	 ah, 02h
+1   274	    00C2  B2 2D				 mov	 dl, '-'
+1   275	    00C4  CD 21				 int	 21h
+1   276	    00C6  8B C1				 mov	 ax, cx
+1   277	    00C8  F7 D8				 neg	 ax
+1   278	    00CA			  oi1:
+1   279	    00CA  33 C9				 xor	 cx, cx
+1   280	    00CC  BB 000A			 mov	 bx, 10
+1   281	    00CF			  oi2:
+1   282	    00CF  33 D2				 xor	 dx,dx
+1   283	    00D1  F7 F3				 div	 bx
+1   284	    00D3  52				 push	 dx
+1   285	    00D4  41				 inc	 cx
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 6
+a.asm
+
+
+
+1   286	    00D5  85 C0				 test	 ax, ax
+1   287	    00D7  75 F6				 jnz	 oi2
+1   288	    00D9  B4 02				 mov	 ah, 02h
+1   289	    00DB			  oi3:
+1   290	    00DB  5A				 pop	 dx
+1   291	    00DC  80 C2	30			 add	 dl, '0'
+1   292	    00DF  CD 21				 int	 21h
+1   293	    00E1  E2 F8				 loop	 oi3
+1   294
+1   295	    00E3  5A				 pop	 dx
+1   296	    00E4  59				 pop	 cx
+1   297	    00E5  5B				 pop	 bx
+1   298	    00E6  58				 pop	 ax
+1   299	    00E7  C3				 ret
+1   300	    00E8			 print_int2 endp
+1   301
+1   302	    00E8			 print_int2_array proc
+1   303
+1   304	    00E8  55				 push	 bp
+1   305	    00E9  50				 push	 ax
+1   306	    00EA  53				 push	 bx
+1   307						 ; total 6
+1   308
+1   309	    00EB  8B EC				 mov	 bp, sp
+1   310	    00ED  8B 76	0A			 mov	 si, [bp+10]	; array
+1   311	    00F0  8B 5E	08			 mov	 bx, [bp+8]    ; len
+1   312	    00F3  D1 E3				 shl	 bx, 1	       ; *size(int) = 2
+1   313	    00F5  03 DE				 add	 bx, si	       ; +first	addr
+1   314
+1   315	    00F7  3B F3				 cmp	 si, bx
+1   316	    00F9  74 25				 je	 PA_array_is_empty
+1   317
+1   318	    00FB  E8 FF3E			 call	 print_open_bracket
+1   319	    00FE			  PA_print_loop:
+1   320	    00FE  8B 04				 mov	 ax, [si]      ; current element
+1   321	    0100  E8 FFB3			 call	 print_int2
+1   322	    0103  E8 FF14			 call	 print_comma
+1   323	    0106  E8 FEF7			 call	 print_space
+1   324
+1   325	    0109  83 C6	02			 add	 si, 2
+1   326	    010C  3B F3				 cmp	 si, bx
+1   327	    010E  74 02				 je	 PA_print_end
+1   328	    0110  EB EC				 jmp	 PA_print_loop
+1   329
+1   330	    0112			  PA_print_end:
+1   331	    0112  E8 FEF8			 call	 print_backspace
+1   332	    0115  E8 FEF5			 call	 print_backspace
+1   333	    0118  E8 FF2E			 call	 print_close_bracket
+1   334	    011B  E8 FF09			 call	 CRLF
+1   335	    011E  EB 0B				 jmp	 PA_end
+1   336
+1   337	    0120			  PA_array_is_empty:
+1   338	    0120  E8 FF19			 call	 print_open_bracket
+1   339	    0123  E8 FF23			 call	 print_close_bracket
+1   340	    0126  E8 FEFE			 call	 CRLF
+1   341	    0129  EB 00				 jmp	 PA_end
+1   342
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 7
+a.asm
+
+
+
+1   343	    012B			  PA_end:
+1   344	    012B  5B				 pop	 bx
+1   345	    012C  58				 pop	 ax
+1   346	    012D  5D				 pop	 bp
+1   347	    012E  C3				 ret
+1   348	    012F			 print_int2_array endp
+1   349
+1   350
+    351
+    352	    012F			 readString proc
+    353	    012F  50				 push ax
+    354	    0130  52				 push dx
+    355	    0131  57				 push di
+    356
+    357	    0132  BA 0000r			 lea  dx, string-2
+    358	    0135  B4 0A				 mov  ah, 0Ah
+    359	    0137  CD 21				 int  21h
+    360	    0139  A0 0001r			 mov al, string_len
+    361	    013C  8A 26	0000r			 mov ah, max_len
+    362	    0140  3A E0				 cmp ah, al
+    363	    0142  77 07				 ja e
+    364	    0144  B4 09				 mov ah, 9
+    365	    0146  BA 0164r			 mov dx, offset	message
+    366	    0149  CD 21				 int 21h
+    367	    014B				 e:
+    368	    014B  5F				 pop di
+    369	    014C  5A				 pop dx
+    370	    014D  58				 pop ax
+    371	    014E  C3				 ret
+    372	    014F			 readString endp
+    373
+    374	    014F			 readFile proc
+    375	    014F  60				 pusha
+    376
+    377	    0150  B4 3D			     mov ah, 3dh
+    378	    0152  B0 00				 mov al, 0 ; чтение
+    379	    0154  B9 0041			 mov cx, 65
+    380	    0157  BA 0014r		     mov dx, offset fin
+    381	    015A  CD 21			     int 21h
+    382	    015C  A3 0012r			 mov hFile, ax ; номер файла
+    383
+    384	    015F  B4 3F			     mov ah, 3fh ; чтение	файла
+    385	    0161  8B 1E	0012r		     mov bx, hFile
+    386	    0165  B9 0040		     mov cx, 64	  ; количество читаемых байтов
+    387	    0168  BA 0059r		     mov dx, offset buf	; адрес буфера
+    388	    016B  CD 21			     int 21h
+    389	    016D  A3 0057r			 mov [buf_len],	ax
+    390
+    391	    0170  B4 3E			     mov ah, 3eh ; закрытие файла
+    392	    0172  8B 1E	0012r		     mov bx, hFile
+    393	    0176  CD 21			     int 21h
+    394
+    395	    0178  61				 popa
+    396	    0179  C3				 ret
+    397	    017A			 readFile endp
+    398
+    399	    017A			 writeBuf proc
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 8
+a.asm
+
+
+
+    400	    017A  60				 pusha
+    401
+    402	    017B  B4 3C			     mov ah, 3ch ; создание файла
+    403	    017D  BA 0035r		     mov dx, offset fout
+    404	    0180  B9 0000			 mov cx, 0
+    405	    0183  CD 21			     int 21h
+    406	    0185  A3 0012r			 mov hFile, ax
+    407
+    408	    0188  B4 40			     mov ah, 40h ; запись	в файл
+    409	    018A  8B 1E	0012r		     mov bx, hFile
+    410	    018E  8B 0E	0162r		     mov cx, [ans_len]
+    411	    0192  BA 009Ar		     mov dx, offset ans
+    412	    0195  CD 21			     int 21h
+    413
+    414	    0197  B4 3E			     mov ah, 3eh ; закрытие файла
+    415	    0199  8B 1E	0012r		     mov bx, hFile
+    416	    019D  CD 21			     int 21h
+    417
+    418	    019F  61				 popa
+    419	    01A0  C3				 ret
+    420	    01A1			 writeBuf endp
+    421
+    422	    01A1			 createAns proc
+    423	    01A1  60				 pusha
+    424	    01A2  FC				 cld
+    425	    01A3  B8 0000s			 mov ax, dseg
+    426	    01A6  8E C0				 mov es, ax
+    427	    01A8  BE 0059r			 mov si, offset	buf
+    428	    01AB  BF 009Ar			 mov di, offset	ans
+    429	    01AE  8B 0E	0057r			 mov cx, buf_len
+    430	    01B2  F3> A4			 rep movsb
+    431	    01B4  BE 0002r			 mov si, offset	string
+    432	    01B7  33 C9				 xor cx, cx
+    433	    01B9  8A 0E	0001r			 mov cl, string_len
+    434	    01BD  F3> A4			 rep movsb
+    435	    01BF  A1 0057r			 mov ax, buf_len
+    436	    01C2  33 C9				 xor cx, cx
+    437	    01C4  8A 0E	0001r			 mov cl, string_len
+    438	    01C8  03 C1				 add ax, cx
+    439	    01CA  A3 0162r			 mov ans_len, ax
+    440	    01CD  61				 popa
+    441	    01CE  C3				 ret
+    442	    01CF			 createAns endp
+    443
+    444	    01CF			 parseParam proc
+    445	    01CF  60				 pusha
+    446
+    447	    01D0  33 C9				 xor cx, cx
+    448	    01D2  26: 8A 0E 0080		 mov cl, es:[80h]
+    449	    01D7  FE C9				 dec cl
+    450
+    451	    01D9  BE 0082			 mov si, 82h
+    452	    01DC  BF 0014r			 lea di, fin
+    453
+    454	    01DF				 @cycle:
+    455	    01DF  26: 8A 24				 mov ah, es:[si]
+    456	    01E2  46					 inc si
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 9
+a.asm
+
+
+
+    457	    01E3  80 FC	20				 cmp ah, 32
+    458	    01E6  74 05					 jz m3
+    459	    01E8  88 25					 mov [di], ah
+    460	    01EA  47					 inc di
+    461	    01EB  EB 03					 jmp m4
+    462	    01ED					 m3:
+    463	    01ED  BF 0035r				 lea di, fout
+    464	    01F0					 m4:
+    465	    01F0  E2 ED				 loop @cycle
+    466
+    467	    01F2  61				 popa
+    468	    01F3  C3				 ret
+    469	    01F4			 parseParam endp
+    470
+    471	    01F4			 start:
+    472	    01F4  B8 0000s			 mov	 ax, dseg
+    473	    01F7  8E D8				 mov	 ds, ax
+    474
+    475	    01F9  E8 FF33			 call readString
+    476	    01FC  E8 FFD0			 call parseParam
+    477	    01FF  E8 FF4D			 call readFile
+    478
+    479	    0202  E8 FF9C			 call createAns
+    480	    0205  E8 FF72			 call writeBuf
+    481
+    482	    0208  B8 4C00			 mov	 ax, 4c00h
+    483	    020B  CD 21				 int 21h
+    484	    020D			 cseg ends
+    485					 end start
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 10
+Symbol Table
+
+
+
+
+Symbol Name		Type   Value			   Cref	(defined at #)
+
+??DATE			Text   "12/24/14"
+??FILENAME		Text   "a	"
+??TIME			Text   "17:55:02"
+??VERSION		Number 0314
+@CPU			Text   0F0FH			   #1
+@CURSEG			Text   CSEG			   #4  #8  #24
+@CYCLE			Near   CSEG:01DF		   #454	 465
+@FILENAME		Text   A
+@WORDSIZE		Text   2			   #1  #4  #8  #24
+ANS			Byte   DSEG:009A		   #18	411  428
+ANS_LEN			Word   DSEG:0162		   #19	410  439
+BIG_INT			Near   CSEG:008A		   135	139  #149  174
+BUF			Byte   DSEG:0059		   #17	387  427
+BUF_LEN			Word   DSEG:0057		   #16	389  429  435
+CREATEANS		Near   CSEG:01A1		   #422	 479
+CRLF			Near   CSEG:0027		   #70	334  340
+E			Near   CSEG:014B		   363	#367
+END_ALL			Near   CSEG:00B2		   144	148  #175
+END_LOOP		Near   CSEG:0079		   #140	 158  161
+FIN			Byte   DSEG:0014		   #14	380  452
+FOUT			Byte   DSEG:0035		   #15	403  463
+HFILE			Word   DSEG:0012		   #13	382  385  392  406  409	 415
+M3			Near   CSEG:01ED		   458	#462
+M4			Near   CSEG:01F0		   461	#464
+MAX_LEN			Byte   DSEG:0000		   #9  361
+MESSAGE			Byte   DSEG:0164		   #20	365
+NEGATIVE		Near   CSEG:006F		   130	#136
+NEGATIVE_1		Near   CSEG:0083		   142	#145
+OI1			Near   CSEG:00CA		   270	#278
+OI2			Near   CSEG:00CF		   #281	 287
+OI3			Near   CSEG:00DB		   #289	 293
+PARSEPARAM		Near   CSEG:01CF		   #444	 476
+PA_ARRAY_IS_EMPTY	Near   CSEG:0120		   316	#337
+PA_END			Near   CSEG:012B		   335	341  #343
+PA_PRINT_END		Near   CSEG:0112		   327	#330
+PA_PRINT_LOOP		Near   CSEG:00FE		   #319	 328
+POSITIVE		Near   CSEG:0067		   131	#132
+PRINT_BACKSPACE		Near   CSEG:000D		   #42	331  332
+PRINT_CLOSE_BRACKET	Near   CSEG:0049		   #101	 333  339
+PRINT_COMMA		Near   CSEG:001A		   #56	322
+PRINT_INT2		Near   CSEG:00B6		   #263	 321
+PRINT_INT2_ARRAY	Near   CSEG:00E8		   #302
+PRINT_OPEN_BRACKET	Near   CSEG:003C		   #87	318  338
+PRINT_SPACE		Near   CSEG:0000		   #29	323
+READFILE		Near   CSEG:014F		   #374	 477
+READSTRING		Near   CSEG:012F		   #352	 475
+READ_INT2		Near   CSEG:0056		   #119
+START			Near   CSEG:01F4		   #471	 485
+STRING			Byte   DSEG:0002		   #11	357  431
+STRING_LEN		Byte   DSEG:0001		   #10	360  433  437
+TEMP			Number [SSEG:BP-0002]		   #124	 134  138  143	146  163  166  173
+WRITEBUF		Near   CSEG:017A		   #399	 480
+Turbo Assembler	 Version 3.2	    12/24/14 17:55:03	    Page 11
+Symbol Table
+
+
+
+
+Groups & Segments	Bit Size Align	Combine	Class	   Cref	(defined at #)
+
+CSEG			16  020D Para	none		   2  #24
+DSEG			16  016C Para	none		   2  #8  425  472
+SSEG			16  0100 Para	Stack		   2  #4
+
