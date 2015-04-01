@@ -52,7 +52,7 @@ get_full_squares endp
 
 
 is_square proc
-	; (ax)int -> (ax)bool
+	; (ax)int -> (al)bool
 
 	;for (int i = 0; i <= x; ++i)
 	;    if (i*i == x)

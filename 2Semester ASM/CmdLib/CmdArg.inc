@@ -305,4 +305,3 @@ get_cmd_arg proc						; Возвращает первый неучтенный
 	GCA_exit:
 		ret
 get_cmd_arg endp
-
