@@ -1,4 +1,13 @@
-;requires include SexyPrnt.inc
+; Автор: Никита Селезнев, ne.seleznev@gmail.com
+;        УрФУ, ФИИТ-301, 2015
+;
+; Наброски для чтения целых чисел. Делал в первом семетре,
+; поэтому код очень плохой :) Нужды не возникает, вот и
+; не исправляю
+;
+; Зависимости:
+;     Вроде нет
+;
 
 read_int2 proc
 	push 	bx
@@ -143,91 +152,3 @@ read_int2 endp
 ; 	; pop 	bp
 ; 	; ret
 ; read_int2_array endp 
-
-print_int2 proc
-	push	ax
-	push 	bx
-	push 	cx
-	push 	dx
-
-	test    ax, ax
-	jns     oi1
-
-	mov     cx, ax
-	mov     ah, 02h
-	mov     dl, '-'
-	int     21h
-	mov     ax, cx
-	neg     ax
- oi1:
-	xor     cx, cx
-	mov     bx, 10
- oi2:
-	xor     dx,dx
-	div     bx
-	push    dx
-	inc     cx
-	test    ax, ax
-	jnz     oi2
-	mov     ah, 02h
- oi3:
-	pop     dx
-	add     dl, '0'
-	int     21h
-	loop    oi3
-
-	pop 	dx
-	pop 	cx
-	pop 	bx
-	pop 	ax
-	ret
-print_int2 endp
-
-print_int2_array proc
-
-	push 	bp
-	push 	ax
-	push 	bx
-	; total 6
-
-	mov 	bp, sp
-	mov 	si, [bp+10]    ; array
-	mov 	bx, [bp+8]    ; len
-	shl 	bx, 1         ; *size(int) = 2
-	add 	bx, si        ; +first addr
-
-	cmp     si, bx
-	je      PA_array_is_empty
-
-	call 	print_open_bracket
- PA_print_loop:
-	mov 	ax, [si]      ; current element
-	call 	print_int2
-	call 	print_comma
-	call 	print_space
-
-	add     si, 2
-	cmp     si, bx
-	je      PA_print_end
-	jmp     PA_print_loop
-
- PA_print_end:
- 	call 	print_backspace
- 	call 	print_backspace
-	call 	print_close_bracket
-	call 	CRLF
-	jmp 	PA_end
-
- PA_array_is_empty:
- 	call 	print_open_bracket
-	call 	print_close_bracket
-	call 	CRLF
-	jmp 	PA_end
-
- PA_end:
-	pop 	bx
-	pop 	ax
-	pop 	bp
-	ret
-print_int2_array endp
-
