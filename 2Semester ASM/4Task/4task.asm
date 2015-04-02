@@ -222,7 +222,7 @@ draw_ascii_table endp
 
 	; ฅเข๋ฉ  เฃใฌฅญโ - ขจคฅฎ-เฅฆจฌ
 		mov		si, offset cmd_line
-		mov		di, offset cmd_arg_buffer
+		mov		ah, 10h
 		call	get_cmd_arg
 		jc		@illegal_key
 
@@ -234,7 +234,7 @@ draw_ascii_table endp
 
 	; โฎเฎฉ  เฃใฌฅญโ - ฎโฎกเ ฆ ฅฌ ๏ แโเ ญจๆ 
 		mov		si, offset cmd_line
-		mov		di, offset cmd_arg_buffer
+		mov		ah, 10h
 		call	get_cmd_arg
 		jc		@illegal_key
 
@@ -337,12 +337,10 @@ illegal_video_mode_err db 'Error! ASCII-chart available only for text video-mode
 
 arg1			dw		?
 arg2			dw		?
-cmd_arg_buffer	db		256 dup (?)
 
 line_1			db		"ษอออหอออออออออออออออออออออออออออออออออป "
 line_2			db		"บ \ บ 0 1 2 3 4 5 6 7 8 9 A B C D E F บ "
 line_3			db		"ฬอออฮอออออออออออออออออออออออออออออออออน "
 line_last		db		"ศอออสอออออออออออออออออออออออออออออออออผ "
-
 
 end @entry

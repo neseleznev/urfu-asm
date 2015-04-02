@@ -74,7 +74,7 @@ include	ChVideo.inc
 	; Чтение аргументов командной строки
 	read_arg:
 		mov		si, offset cmd_line
-		mov		di, offset cmd_arg
+		mov		ah, 10h
 		call	get_cmd_arg
 		jc		@illegal_key
 
@@ -180,6 +180,5 @@ illegal_key_err	db		'Ошибка! Указан неверный ключ при запуске.'			,0Dh,0Ah,0Dh,0
 
 cmd_arg_number	dw		0
 args			dw		?, ?
-cmd_arg			db		256 dup (?)
 
 end @entry

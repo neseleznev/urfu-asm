@@ -34,7 +34,7 @@ include	ChVideo.inc
 
 	; Первое число
 		mov		si, offset cmd_line
-		mov		di, offset cmd_arg
+		mov		ah, 10h
 		call	get_cmd_arg
 		jc		@illegal_key
 
@@ -51,7 +51,7 @@ include	ChVideo.inc
 
 	; Второе число
 		mov		si, offset cmd_line
-		mov		di, offset cmd_arg
+		mov		ah, 10h
 		call	get_cmd_arg
 		jc		@illegal_key
 
@@ -118,6 +118,5 @@ press_any		db		'Нажмите любую клавишу для продолжения...'					,0Dh,0Ah,'$'
 
 cmd_arg1		dw		?
 cmd_arg2		dw		?
-cmd_arg			db		256 dup (?)
 
 end @entry

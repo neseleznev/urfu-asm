@@ -116,8 +116,11 @@ f_error_arg endp
 
 @start:
 
-;			mov		si, offset cmd_line				; Сама строка
-;			call	print_si_pascal_string
+		; Напечатаем прочитанную командную строку
+		mov		si, offset cmd_line
+		call	print_si_pascal_string
+		call	CRLF
+		call	CRLF
 
 	read_arg:
 		mov		si, offset cmd_line
