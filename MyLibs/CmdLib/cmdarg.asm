@@ -29,7 +29,7 @@ include CmdArg.inc
 f_string_arg proc
 		mov		dx, offset string_msg
 		call	print_dx_string
-		mov		dx, di				; Сама строка
+		mov		dx, di
 		call	print_dx_string
 		call	CRLF
 		ret
@@ -116,9 +116,11 @@ f_error_arg endp
 
 @start:
 
+;			mov		si, offset cmd_line				; Сама строка
+;			call	print_si_pascal_string
+
 	read_arg:
 		mov		si, offset cmd_line
-		mov		di, offset cmd_arg
 		mov		ah, 10h
 
 		call	get_cmd_arg
@@ -233,8 +235,6 @@ error_overflow	db		'01: Число слишком большое, произошло переполнение'	,0Dh,0Ah,
 error_other		db		'02: Еще одна возможная ошибка аргумента'			,0Dh,0Ah,'$'
 error_unknown	db		'03: Неизвестная ошибка аргумента'					,0Dh,0Ah,'$'
 attempt_msg		db		'. Попытка обработать ключ...'				,0Dh,0Ah,'$'
-goodbye_msg		db		'Все аргументы обработаны. Good bye!'							,'$'
-
-cmd_arg			db		256 dup (?)
+goodbye_msg		db		'Все аргументы обработаны. Good bye!'						,'$'
 
 end @entry
