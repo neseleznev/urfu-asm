@@ -20,8 +20,8 @@ ORG 100h
 @entry:
 		jmp			@start
 
-include SexyPrnt.inc
-include CmdArg.inc
+include SexyPrnt.inc			; >= 1.3
+include CmdArg.inc				; >= 0.9.5
 include	ChVideo.inc
 
 @illegal_key:

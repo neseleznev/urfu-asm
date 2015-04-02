@@ -17,8 +17,8 @@ ORG 100h
 	jmp			@start
 
 
-include SexyPrnt.inc
-include CmdArg.inc
+include SexyPrnt.inc			; >= 1.3
+include CmdArg.inc				; >= 0.9.5	
 
 @key_help:
 	mov		dx, offset usage
@@ -33,7 +33,7 @@ include CmdArg.inc
 
 @start:
 	mov		si, offset cmd_line
-	mov		di, offset cmd_arg
+	mov		ah, 10h
 	call	get_cmd_arg
 	jc		@key_error
 

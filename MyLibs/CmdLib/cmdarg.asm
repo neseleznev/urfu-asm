@@ -22,8 +22,8 @@ ORG 100h
 		jmp			@start
 
 
-include SexyPrnt.inc
-include CmdArg.inc
+include SexyPrnt.inc			; >= 1.3.1
+include CmdArg.inc				; >= 0.9.5
 
 
 f_string_arg proc
