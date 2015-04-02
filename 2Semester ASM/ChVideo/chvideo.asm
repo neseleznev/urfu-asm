@@ -1,13 +1,15 @@
 ; Никита Селезнев, ФИИТ-301, 2015
 ;
-; Видео-режимы (домашка от 18 марта):
-; program.com (\d) (\d) (\-)?/
-; \1 = video_mode
-; \2 = display_page
-; Программа устанавливает видеорежим и страницу согласно параметрам, при наличии \3 ждет,
-; пока пользователь нажмет клавишу, затем возвращает экран в исходное состояние и выходит.
-; Если \3 отсутствует, то устанавливает \1, \2 и выходит.
+; Пример использования ChVideo.inc
+; program.com (\d) (\d)
+;     \1 = video_mode
+;     \2 = display_page
+; Программа устанавливает видеорежим и страницу согласно параметрам.
 ; Использовать функции 00h, 05h, 0Fh int 10h, разобрать самостоятельно.
+; 
+; P.S. Довольно муторное чтение аргументов, не обращайте внимания.
+;      Сделано для избавления от зависимостей. Нужна только ChVideo.inc
+
 .286
 .model tiny
 .code
@@ -20,9 +22,7 @@ ORG 100h
 @entry:
 		jmp			@start
 
-
-include	ChVideo.inc
-
+include ChVideo.inc
 
 ; Вспомогательные
 print_int2 proc							; Печать двухбайтного числа в десятичном виде
@@ -60,7 +60,6 @@ print_int2 proc							; Печать двухбайтного числа в десятичном виде
 		ret
 print_int2 endp
 
-
 print_dx_string proc					; Печать строки
 		push ax						; Вход:
 		mov			ah, 09h			;      dx = адрес строки
@@ -68,7 +67,6 @@ print_dx_string proc					; Печать строки
 		pop ax
 		ret
 print_dx_string endp
-
 
 CRLF proc
 		pusha
@@ -83,7 +81,6 @@ CRLF proc
 		popa
 		ret
 CRLF endp
-
 
 char_to_int proc						; Перевод символа в число
 	; Вход:
@@ -170,7 +167,7 @@ parse_second_arg:
 		xor		ah, ah
 		mov		cmd_arg2, ax
 
-	jmp __2
+	jmp @process_args
 
 
 @illegal_key:
@@ -184,25 +181,6 @@ parse_second_arg:
 		jmp parse_first_arg
 	__1:
 		jmp	parse_second_arg
-	__2:
-
-	; Если cmd_line[5] (или [6], если первое было 10h) == " ", значит есть третий аргумент
-	third_arg:
-		; А следующий - пробел или совсем нет
-		add		cx, 5
-		cmp		cmd_len, cl
-		jl		@process_args
-				mov		di,	cx
-		cmp		cmd_line[di], ' '
-		jne		@illegal_key
-
-
-	; TODO переделать, там как-то по-другому было
-	; А если ещё есть, ждем нажатия клавиши
-		mov		dx, offset press_any
-		call	print_dx_string
-		mov		ah, 07h
-		int 	21h
 
 	; Обработка двух чисел
 	@process_args:
@@ -233,13 +211,11 @@ parse_second_arg:
 illegal_key_err	db		'Ошибка! Указан неверный ключ при запуске. См. справку',		0Dh,0Ah
 				db		'Простая учебная программа для смены видео-режима и страницы',	0Dh,0Ah
 				db		'при помощи функций 00h,05h,0Fh прерывания BIOS 10h',	0Dh,0Ah,0Dh,0Ah
-				db		'Использование: video \1      \2         [\3]',					0Dh,0Ah
-				db		'               video <режим> <страница> [<символ>]',	0Dh,0Ah,0Dh,0Ah
+				db		'Использование: video \1      \2         ',						0Dh,0Ah
+				db		'               video <режим> <страница> ',				0Dh,0Ah,0Dh,0Ah
 				db		'Параметры:',													0Dh,0Ah
 				db		'  \1           Номер видео-режима [0,1,2,3,4,5,6,7,D,E,F,10]',	0Dh,0Ah
 				db		'  \2           Страница дисплея [0 для всех,1-7 опционально]', 0Dh,0Ah
-				db		'  \3           При наличии ждёт нажатия клавиши, затем',		0Dh,0Ah
-				db		'               возвращает экран в исходное состояние, выходит',0Dh,0Ah
 				db		0Dh,0Ah,'$'
 
 change_video_msg db		'Новый видео-режим: '										,'$'
