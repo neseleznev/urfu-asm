@@ -114,12 +114,12 @@ f_error_arg proc
 f_error_arg endp
 
 
-
 @start:
 
 	read_arg:
 		mov		si, offset cmd_line
 		mov		di, offset cmd_arg
+		mov		ah, 10h
 
 		call	get_cmd_arg
 		jc		@error_arg
