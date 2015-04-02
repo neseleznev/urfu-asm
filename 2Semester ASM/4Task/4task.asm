@@ -1,10 +1,10 @@
 ; Никита Селезнев, ФИИТ-301, 2015
 ;
 ; Таблица символов (домашка от 1 апреля):
-; program.com (\d)
+; ascii.com (\d) (\d)
 ; 
-; Нарисовать во всех текстовых видео-режимах на всех страницах
-; красивую квадратную таблицу символов
+; Нарисовать для любого текстового видео-режима и страницы
+; красивую квадратную таблицу символов по центру экрана
 ;  ____________
 ; |_|0_1_2_._F_|
 ; |0|          |
@@ -51,13 +51,6 @@ change_video_mode proc			; Изменение видео-режима
 	; Результат:
 	;     (Флаг CF = 1, если такого нет)
 		pusha
-		mov		bl, al
-		mov		ah, 0Fh
-		int		10h
-
-		cmp		al, bl
-		je		CVM_done
-		mov		al, bl
 
 		; Существует ли такой видео-режим?
 		cmp		al, 10h
@@ -71,15 +64,9 @@ change_video_mode proc			; Изменение видео-режима
 		stc
 		jmp		CVM_exit
 	CVM_true:
+		clc
 		xor		ah, ah
 		int		10h
-		
-	CVM_done:
-		mov		dx, offset change_msg
-		call	print_dx_string
-		xor		ah, ah
-		call	print_int2
-		call	CRLF
 	CVM_exit:
 		popa
 		ret
@@ -106,18 +93,18 @@ change_display_page proc		; Изменение активной страницы дисплея
 	; Результат:
 	;     (Флаг CF = 1, если номер недопустим)
 		pusha
-		
-		mov		bl, al			; bl = Желаемая страница
-		mov		ah, 0Fh
-		int		10h				; al = Текущий видео-режим
-		cmp		bl, bh			; bh = Текущая страница
-		je		CDP_done
 
-		mov		al, bl
-		test	al, al			; 0 доступен всем
+		mov			bl, al
+		mov			ah, 0Fh				; Читать текущий видео-режим
+		int			10h					; Вход:  нет
+										; Выход: al = текущий режим (см. функцию 00h)
+										;        ah = число текстовых колонок на экране
+										;        bh = номер активной страницы дисплея
+
+		test	bl, bl			; 0 доступна всем
 		jz		CDP_true
 
-		cmp		al, 1			; 1 страница
+		cmp		bl, 1			; 1 страница
 		jne		_CDP_1
 
 		cmp		al, 4
@@ -127,19 +114,17 @@ change_display_page proc		; Изменение активной страницы дисплея
 		jmp		CDP_false
 
 	_CDP_1:						; 2-3 страницы
-		cmp		al, 3
+		cmp		bl, 3
 		jg		_CDP_2
 
 		cmp		al, 4
 		jl		CDP_true
 		cmp		al, 0Dh
 		je		CDP_true
-		cmp		al, 0Dh
-		je		CDP_true
 		jmp		CDP_false
 
 	_CDP_2:						; 4-7 страницы
-		cmp		al, 7
+		cmp		bl, 7
 		jg		CDP_false
 
 		cmp		al, 2
@@ -152,22 +137,157 @@ change_display_page proc		; Изменение активной страницы дисплея
 		stc
 		jmp		CDP_exit
 	CDP_true:
+		clc
 		mov		ah, 05h
 		mov		al, bl
 		int		10h
-
-	CDP_done:
-		mov		dx, offset change_page_msg
-		call	print_dx_string
-		xor		ah, ah
-		mov		al, bl
-		call	print_int2
-		call	CRLF
 	CDP_exit:
 		popa
 		ret
 change_display_page endp
 
+
+write_to_video proc
+	push cx
+		mov		cx, 40			; Ширина таблицы 40
+		loop1:
+			mov		dl, [si]
+			mov		es:[di], dl
+			inc		si
+			add		di, 2
+		loop	loop1
+	pop	cx
+	ret
+write_to_video endp
+
+
+int_to_char proc
+	; Вход:      cl - число
+	; Результат: dl - символ
+		mov		dl, cl
+		cmp		dl, 9
+		jg		ItC_HEX
+		add		dl, '0'
+		ret
+	ItC_HEX:
+		sub		dl, 10
+		add		dl, 'A'
+		ret
+int_to_char endp
+
+
+draw_ascii_table proc			; Отрисовка ASCII-таблицы
+	; Вход:       нет
+	; Результат:
+	;     (Флаг CF = 1, если текущий видео-режим не текстовый)
+		pusha
+
+		mov		ah, 0Fh					; Читать текущий видео-режим
+		int		10h						; Вход:  нет
+										; Выход: al = текущий режим (см. функцию 00h)
+										;        ah = число текстовых колонок на экране
+										;        bh = номер активной страницы дисплея
+		cmp		al, 7
+		mov		dx, 0B000h				; Адрес сегмента видео-буфера 7 режима
+		je		DAT_draw_ascii
+		cmp		al, 3
+		jle		DAT_noerror
+		stc
+		popa
+		ret
+	
+	DAT_noerror:
+		mov 	dx, 0B800h				; Адрес сегмента видео-буфера 0,1,2,3 режимов
+
+	DAT_draw_ascii:
+
+		mov		es, dx					; Установим сегмент видео-буфера
+
+		; Переключимся на нужную страницу
+		cmp		al, 1
+		jle		DAT_shift_800
+		shl		bh, 4					; Для 2-3,7 (25x80) сдвиги по 1000h
+		jmp		DAT_shifted
+		DAT_shift_800:
+			shl		bh, 3				; Для 0-1 (25x40) сдвиги по 800h,
+		DAT_shifted:
+			xor		bl, bl
+
+		; Переключим страницу +(800h или 1000h)*(номер стр)
+		mov		di, bx					; Установим адрес назначения в (B800 или B000):di
+
+		; Пропустим первые три строки (сост.режима, страницы, текст this_is_ascii)
+		xor		ch, ch
+		mov		cl, ah					; cx <- число колонок (т.е. ширина строки экрана)
+		imul	cx, 6					; (по 2 байта)*(3 строки) = 6
+		add		di, cx
+
+		; Вычислим отступ до таблицы (предп., что ширина четная)
+		mov		al, ah
+		xor		ah, ah
+		sub		ax, 40					; Из числа колонок вычтем ширину (40 <=)
+		;shr		ah, 1				; И поделим на два (затем умножим на два,
+		;shl		ah, 1				; т.к. под одно знако-место 2 байта)
+
+		; И сдвинем до начала таблицы
+		add		di, ax
+
+		mov		si, offset line_1		; Откуда читаем
+		call	write_to_video
+
+		add		di, ax					; К началу таблицы на след.строке
+		add		di, ax
+		mov		si, offset line_2		; Откуда читаем
+		call	write_to_video
+
+		add		di, ax					; К началу таблицы на след.строке
+		add		di, ax
+		mov		si, offset line_3		; Откуда читаем
+		call	write_to_video
+
+		mov		cx, 0
+		DAT_lines_loop:
+			add		di, ax					; К началу таблицы на след.строке
+			add		di, ax
+			mov		si, offset line_2		; Напечатаем пустую строку таблицы с границами
+			call	write_to_video
+
+			push	di						; А потом будем исправлять
+				sub		di, 40 *2			; Назад на ширину таблицы (40)
+				add		di, 2  *2			; Сдвинемся на левую колонку через "║ "
+				call	int_to_char
+				mov		es:[di], dl			; Левая колонка (0...F)
+				add		di, 4  *2			; Сдвинемся на поле боя через "n ║ "
+				
+				mov		dx, 0
+				DAT_column_loop:
+					mov		bx, cx
+					shl		bl, 4			; bx = cx * 10h (номер строки)
+					add		bl, dl			;         + dx  (номер столбца)
+					
+					mov		bh, 00Ch	; Старший байт (аттрибуты)(цвет) = (без)(Красный цвет)
+										; P.S. (08Сh прикольный)
+					mov		es:[di], bx		; Установим знако-место
+					add		di, 2 *2		; Сдвинемся к следующему через "с "
+
+					inc		dx
+					cmp		dx, 16
+					jl		DAT_column_loop
+			pop		di
+
+			inc		cx
+			cmp		cl, 16
+			jl		DAT_lines_loop
+
+		add		di, ax
+		add		di, ax
+		mov		si, offset line_last		; Откуда читаем
+		call	write_to_video
+
+		clc
+		popa
+		ret
+draw_ascii_table endp
 
 @lbl_status:
 		mov			dx, offset status_msg
@@ -211,57 +331,83 @@ change_display_page endp
 
 @start:							; Сюда передается управление в самом начале
 
-	ret
-	; Чтение аргументов командной строки
-	read_arg:
+	; Если нет аргументов - рисуем (если возможно) для текущего видео-режима
+		cmp		[cmd_len], 0
+		jz		@no_args
+
+	; Первый аргумент - видео-режим
 		mov		si, offset cmd_line
-		mov		di, offset cmd_arg
+		mov		di, offset cmd_arg_buffer
 		call	get_cmd_arg
 		jc		@illegal_key
 
-		cmp		cmd_arg_number, 4		; Если есть третий аргумент
-		je		@process_args_delay
-
-
-		cmp		cmd_arg_number, 0		; Первый аргумент может быть ключом
-		jg		allow_only_integer		; остальные - нет
-
 		cmp		al, 2					; Если аргумент является ключом -x /x
 		je		found_slash_or_minus
+		cmp		al, 1					; Если аргумент является не числом
+		jne		@illegal_key			; - ошибка
+		mov		arg1, bx				; Если аргумент является числом, сохраним
 
-	 allow_only_integer:
-		cmp		al, 1					; не числом
-		jne		@illegal_key
+	; Второй аргумент - отображаемая страница
+		mov		si, offset cmd_line
+		mov		di, offset cmd_arg_buffer
+		call	get_cmd_arg
+		jc		@illegal_key
 
-		; У нас число, сохраним его
-		mov		si, offset args
-		mov		cx, cmd_arg_number
-		add		si, cx
-		mov		[si], bx
+		cmp		al, 1					; Если аргумент является не числом
+		jne		@illegal_key			; - ошибка
+		mov		arg2, bx				; Если аргумент является числом, сохраним
 
-		add		cmd_arg_number, 2
-		xor		cx, cx
-		mov		cl, [cmd_len]			; cx <- Новая длина командной строки
-		test	cx, cx					; Если не ноль, получить еще аргумент
-	jnz		read_arg
-	
-	jmp		@process_args
+		jmp		@process_args
 
-	@process_args_delay:
-		mov		dx, offset press_any
-		call print_dx_string
-		mov		ah, 07h
-		int 	21h
+	@no_args:
+		mov		ah, 0Fh					; Читать текущий видео-режим
+		int		10h						; Вход:  нет
+										; Выход: al = текущий режим (см. функцию 00h)
+		xor		ah, ah					;        ah = число текстовых колонок на экране
+		mov		arg1, ax				;        bh = номер активной страницы дисплея
+		mov		al, bh
+		mov		arg2, ax
 
 	@process_args:
-		mov		ax, args[0]
+		; Изменим видео-режим и страницу
+		mov		ax, arg1
 		call	change_video_mode
 		jc		@illegal_key
-		mov		ax, args[2]
+		mov		ax, arg2
 		call	change_display_page
 		jc		@illegal_key
-	
-	ret
+
+		; Уведомим об этом
+		mov		dx, offset change_video_msg
+		call	print_dx_string
+		mov		ax, arg1
+		call	print_int2
+		call	CRLF
+
+		mov		dx, offset change_page_msg
+		call	print_dx_string
+		mov		ax, arg2
+		call	print_int2
+		call	CRLF
+		
+		; Нарисуем красивую ASCII-таблицу по центру экрана
+		mov		dx, offset this_is_ascii
+		call	print_dx_string
+
+		call	draw_ascii_table
+		jc		illegal_video_mode
+
+		mov		cx, 19
+		clear_lines_for_table:
+		call	CRLF
+		loop	clear_lines_for_table
+
+		ret
+
+	illegal_video_mode:
+		mov		dx, offset illegal_video_mode_err
+		call	print_dx_string
+		ret
 
 	found_slash_or_minus:				; Агрумент начинается с / или -
 		cld								; Определим, какая буква идет после
@@ -279,17 +425,15 @@ keys			db		'sh'
 lbls			dw		@illegal_key,	@lbl_help,		@lbl_status
 
 ; Текст, который выдает программа с ключом /h:
-usage			db		'Учебная программа для отрисовки таблиц ASCII-символов во ',	0Dh,0Ah
-				db		'всех текстовых видео-режимах и доспустимых страницах',	0Dh,0Ah,0Dh,0Ah
-				db		'Использование: ascii \1      \2         [\3]',					0Dh,0Ah
-				db		'               ascii <режим> <страница> [<символ>]',	0Dh,0Ah,0Dh,0Ah
-				db		'Параметры:',													0Dh,0Ah
-				db		'  \1           Номер видео-режима [0,1,2,3,4,5,6,7,D,E,F,10]',	0Dh,0Ah
-				db		'  \2           Страница дисплея',								0Dh,0Ah
-				db		'  \3           При наличии ждёт нажатия клавиши, затем',		0Dh,0Ah
-				db		'               возвращает экран в исходное состояние, выходит',0Dh,0Ah
-				db		'  -h [/h]      Вывести это сообщение со справкой',				0Dh,0Ah
-				db		'  -s [/s]      Показать информацию о текущем видео-режиме',	0Dh,0Ah
+usage			db		'Учебная программа для отрисовки таблиц ASCII-символов во всех',	0Dh,0Ah
+				db		'текстовых видео-режимах и доспустимых страницах по центру экрана.',0Dh,0Ah,0Dh,0Ah
+				db		'Использование: ascii [Без аргументов    ] - в текущем режиме',		0Dh,0Ah	
+				db		'               ascii [\1      \2        ] - сменить и нарисовать',	0Dh,0Ah,0Dh,0Ah
+				db		'Параметры:',														0Dh,0Ah
+				db		'  \1           Номер текстового видео-режима   [0,1,  2,3,  7]',	0Dh,0Ah
+				db		'  \2           Страница дисплея соответственно [0-7,  0-3,  0]',	0Dh,0Ah
+				db		'  -h [/h]      Вывести это сообщение со справкой',					0Dh,0Ah
+				db		'  -s [/s]      Показать информацию о текущем видео-режиме',		0Dh,0Ah
 				db		0Dh,0Ah,'$'
 
 ; Тексты, которые выдает программа при успешном выполнении:
@@ -297,15 +441,23 @@ status_msg		db		'Статус видео-режима'										,0Dh,0Ah,'$'
 current_mode	db		'    Текущий режим:                           '						,'$'
 current_lines	db		'    Число текстовых колонок на экране:       '						,'$'
 current_page	db		'    Текущий номер активной страницы дисплея: '						,'$'
-change_msg		db		'Изменение видео-режима на '										,'$'
-change_page_msg	db		'Изменение отображаемой страницы на '								,'$'
+change_video_msg	db	'Текущий видео-режим '												,'$'
+change_page_msg	db		'Текущая отображаемая страница '									,'$'
+this_is_ascii	db		'Таблица ASCII-символов:'									,0Dh,0Ah,'$'
 press_any		db		'Нажмите любую клавишу для продолжения...'					,0Dh,0Ah,'$'
 
 ; Тексты, которые выдает программа при ошибках:
 illegal_key_err	db		'Ошибка! Указан неверный ключ при запуске.'			,0Dh,0Ah,0Dh,0Ah,'$'
+illegal_video_mode_err db 'Error! ASCII-chart available only for text video-modes',	 0Dh,0Ah,'$'
 
-cmd_arg_number	dw		0
-args			dw		?, ?
-cmd_arg			db		256 dup (?)
+arg1			dw		?
+arg2			dw		?
+cmd_arg_buffer	db		256 dup (?)
+
+line_1			db		"╔═══╦═════════════════════════════════╗ "
+line_2			db		"║ \ ║ 0 1 2 3 4 5 6 7 8 9 A B C D E F ║ "
+line_3			db		"╠═══╬═════════════════════════════════╣ "
+line_last		db		"╚═══╩═════════════════════════════════╝ "
+
 
 end @entry
