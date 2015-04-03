@@ -2,7 +2,7 @@
 ;
 ; Иллюстративный пример использования библиотеки cmdarg.inc
 ; Скомпилируй и запусти:
-;     cmdarg.com   hello  1 F   10  /x  /xyz -a
+;     cmdarg.com   hello   F 10 10000   /xyz --xyz   /x -a
 ;
 
 .286
@@ -118,14 +118,16 @@ f_error_arg endp
 
 		; Напечатаем прочитанную командную строку
 		mov		si, offset cmd_line
+		call	print_open_bracket
 		call	print_si_pascal_string
+		call	print_close_bracket
 		call	CRLF
 		call	CRLF
+
 
 	read_arg:
 		mov		si, offset cmd_line
 		mov		ah, 10h
-
 		call	get_cmd_arg
 		jc		@error_arg
 
@@ -154,11 +156,15 @@ f_error_arg endp
 
 		@short_key_arg:
 			; bl - символ, di - строка, dx - её длина
+			mov ax, dx
+			call print_int2
 			call	f_short_key_arg
 			jmp		process_key_arg
 
 		@long_key_arg:
 			; di - строка, dx - её длина
+			mov ax, dx
+			call print_int2
 			call	f_long_key_arg
 			jmp		process_key_arg
 

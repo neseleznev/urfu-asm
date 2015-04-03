@@ -2,7 +2,7 @@
 ;        УрФУ, ФИИТ-301, 2015
 ;
 ; Библиотека для работы с аргументами командной строки
-; CmdArg 0.9.4 (от 03.04.2015)
+; CmdArg 1.0 (от бессонной ночи 03.04.2015)
 ;
 ; Для работы основной процедуры необходимо указать
 ;     - Адрес начала строки с аргументами
@@ -31,7 +31,9 @@
 ;     Нет
 ;
 ; Смотри примеры использования cmdarg.asm и shortex.asm
-;
+; P.S. В коде get_cmd_arg присутствуют циклы, которые
+;      стоит заменить на rep stos/scas, но код очень
+;      тяжело отлаживать, поэтому работает - не трогай 
 
 char_to_int proc						; Перевод символа в число
 	; Вход:
@@ -110,25 +112,23 @@ str_to_int proc							; Перевод строки в число
 		xor		ah, ah		; Основание с.с.
 		
 		xchg	ax, bx					; RES, (00, 2 )
-		push	dx						; mul убивает dx
+		 push	dx						; mul убивает dx
 		mul		dx						; ax *= dx
-		;jc		StI_overflow
-		;jo		StI_overflow
-		pop		dx
+		jo		StI_overflow
+		 pop		dx
 		add		ax, bx					; ax += bx
-		;jc		StI_overflow
 	 inc	si
 	loop	StI_loop
 		clc
 		jmp		StI_end
 	StI_incorrect:
+		mov		ax, 0
 		stc
-		mov		ax, 10
 		jmp		StI_end
 	StI_overflow:
-		cli
+		 pop	dx
+		mov		ax, 1
 		stc
-		mov		ax, 88
 		jmp		StI_end
 	StI_end:
 				pop si
@@ -142,6 +142,9 @@ trim_leading_zeros proc					; Усечение ведущих нулей у строки
 	; Вход:
 	;     si = указатель на начало строки из байт, где первый является
 	;          её длиной, т.е. (len)(char_1)(char_2)...(char_len)
+	; Результат:
+	;     si = та же структура, но уже без ведущих нулей
+
 		push	si
 		cld								; Операции со строками в прямом направлении
 		mov		bx,	si					; Сохраним указатель на байт длины строки
@@ -163,9 +166,7 @@ trim_leading_zeros proc					; Усечение ведущих нулей у строки
 	TLZ_done:
 		mov		[bx], dl				; Новая длина строки
 		clc
-
 		jmp		TLZ_exit
-
 	TLZ_error:
 	 	stc
 	TLZ_exit:
@@ -174,14 +175,13 @@ trim_leading_zeros proc					; Усечение ведущих нулей у строки
 trim_leading_zeros endp
 
 
-; TODO stosb
-; TODO str_to_int overflow
 get_cmd_arg proc						; Возвращает первый неучтенный
 	;                                     параметр командной строки.
 	; Вход:
 	;     si = указатель на начало строки из байт, где первый является
 	;          её длиной, т.е. (len)(char_1)(char_2)...(char_len)
-	;     ah = система счисления для аргументов-чисел
+	;     ah = система счисления для аргументов-чисел,
+	;          0, если хотите принудительно считать числа строками
 	; Результат:
 	;     al = Тип аргумента
 	;         0 - Строка (xyz abc)
@@ -258,15 +258,19 @@ get_cmd_arg proc						; Возвращает первый неучтенный
 		sub		di, dx
 
 		; Проверка на число
-		;mov		ah, 10h				; Система счисления (с 0.9.3 версии в аргументах)
+		test	ah, ah					; (с версии 1.0) Если ah = 0, игнорируем числа
+		jz		GCA_ignore_integer
+
+		;mov		ah, 10h				; Система счисления (с версии 0.9.3 в аргументах)
 		mov		si, di		; "I"		; Указатель на начало строки
 		mov		cx, dx					; Длина "I"
 		call	str_to_int
 		jnc		GCA_integer
-		test	ax, ax					; При CF=1, ax=1
+		cmp		ax, 1					; При CF=1, ax=1
 		je		GCA_overflow			; имеем переполнение
 		dec		si
 
+	GCA_ignore_integer:
 		; Проверка на вызов с ключом
 		mov		al, [si + 1]
 		cmp		al, '/'
@@ -284,18 +288,29 @@ get_cmd_arg proc						; Возвращает первый неучтенный
 		jmp		GCA_exit
 		
 	GCA_slash_or_minus:
-		cmp		dx, 2
+		; Обрезать / или -, уменьшить длину
+		inc		di
+		dec		dx
+		cmp		dx, 1
 		jg		GCA_long_key
 
-		mov 	al, 2
 		mov		bl, [si + 2]			; Символ
+		mov 	al, 2
 		jmp		GCA_exit
 
 	GCA_long_key:
-		; TODO --xyz, т.е. если si[1:2] == '--',
-		; передвинуть di на символ вправо, dx--
+		; Длинный linux-style --xyz в -xyz
+		; (если si[1..2] == '--', то передвинуть di вправо, dx=dx-1)
+		mov		al, '-'
+		cmp		[si+1], al
+		jne		GCA_long_key_ok
+		cmp		[si+2], al
+		jne		GCA_long_key_ok
+		inc		di
+		dec		dx
+
+		GCA_long_key_ok:
 		mov 	al, 3
-		;mov		bl, [si + 2]
 		jmp		GCA_exit
 
 	GCA_empty:
@@ -310,11 +325,5 @@ get_cmd_arg proc						; Возвращает первый неучтенный
 		stc
 
 	GCA_exit:
-;				mov ax, di
-;				call print_int2
-;				call CRLF
-;				mov ax, offset cmd_arg
-;				call print_int2
-;				call CRLF
 		ret
 get_cmd_arg endp
