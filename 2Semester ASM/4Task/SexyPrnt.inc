@@ -3,7 +3,7 @@
 ;
 ; Минималистичная библиотека печати на стандартное устройство вывода,
 ; с которой значительно проще жить :)
-; SexyPrnt 1.3 (от 27.03.2015)
+; SexyPrnt 1.3.1 (от 03.03.2015)
 
 
 ; I. Целочисленные.
@@ -345,6 +345,23 @@ print_dl_char proc					; Печать символа из dl
 		pop ax
 		ret
 print_dl_char endp
+
+print_si_pascal_string proc         ; Печать c-addr строки
+    ; Pascal-string (или c-addr) - однобайтовая строка, нулевым
+    ; байтом которой является беззнаковое число, её длина
+        pusha                       ; Вход:
+        xor     ch, ch              ;      si = адрес строки
+        mov     cl, [si]
+        inc     si
+        mov     ah, 02h 
+        PsiPS_loop:
+            mov     dl, [si]
+            int     21h
+            inc     si
+            loop    PsiPS_loop
+        popa
+        ret
+print_si_pascal_string endp
 
 
 ; III. Для красивого дебага.
