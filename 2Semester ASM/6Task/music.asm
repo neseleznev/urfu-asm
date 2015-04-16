@@ -90,7 +90,7 @@ catch_09h	proc	far
 		cmp al, 130
 		jl cont
 			; some magic
-			call drugs_magic_delay
+			;call drugs_magic_delay
 			; staccato
 			;call no_sound
 			mov es:[00h], 0C53h
@@ -112,6 +112,7 @@ catch_09h	proc	far
 		mov [notes +20], 1867
 		mov [notes +22], 1975
 
+		push ax
 		cmp		al, 2
 		jl		silent
 		cmp		al, 13
@@ -135,7 +136,6 @@ catch_09h	proc	far
 		jmp silent
 
 		first_octave:
-		push ax
 			sub		ax, 2
 			shl		ax, 1
 			mov 	di, offset notes
@@ -145,7 +145,6 @@ catch_09h	proc	far
 			jmp		sound_lbl
 
 		second_octave:
-		push ax
 			sub		ax, 16
 			shl		ax, 1
 			mov 	di, offset notes
@@ -155,7 +154,6 @@ catch_09h	proc	far
 			jmp		sound_lbl
 
 		third_octave:
-		push ax
 			sub		ax, 30
 			shl		ax, 1
 			mov 	di, offset notes
@@ -165,7 +163,6 @@ catch_09h	proc	far
 			jmp		sound_lbl
 
 		forth_octave:
-		push ax
 			sub		ax, 44
 			shl		ax, 1
 			mov 	di, offset notes
@@ -176,10 +173,10 @@ catch_09h	proc	far
 
 		sound_lbl:
 			call	sound
-		pop ax
+
 
 		silent:
-
+		pop ax
 		cmp		al, 81h				; Если это отжатие клавиши Esc
 		jne		int9_continue1		; Завершим выполнение программы
 		mov		ax, 2509h			; Восстанавливаем вектор 21h
