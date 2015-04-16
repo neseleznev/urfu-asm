@@ -17,7 +17,7 @@ ORG 100h
 
 include SexyPrnt.inc			; >= 1.3.1
 
-buffer		db		10h dup (?) 
+buffer		db		100h dup (?) 
 head		dw		0
 tail		dw		0
 old_09h		dw		?, ?
@@ -67,10 +67,37 @@ no_sound proc
 no_sound endp
 
 
+drugs_magic_delay proc
+	pusha
+	mov dx, 4
+	DMD_loop:
+		mov cx, 0FFFFh
+		DMD_delay:
+			loop DMD_delay
+		dec		dx
+		test	dx, dx
+		jnz		DMD_loop
+	popa
+	ret
+drugs_magic_delay endp
+
+
 catch_09h	proc	far
 	; in  - read from port
 	; out - write to port
 		in		al,	60h				; скан-код последней нажатой (из 60 порта)
+
+		cmp al, 130
+		jl cont
+			; some magic
+			call drugs_magic_delay
+			; staccato
+			;call no_sound
+			mov es:[00h], 0C53h
+			mov es:[02h], 0C74h
+			mov es:[04h], 0C6Fh
+			mov es:[06h], 0C70h
+		cont:
 
 		mov [notes + 0], 1046
 		mov [notes + 2], 1109
@@ -84,9 +111,7 @@ catch_09h	proc	far
 		mov [notes +18], 1720
 		mov [notes +20], 1867
 		mov [notes +22], 1975
-		;mov		ax, 880
-		;oo:
-		; отпустили пробел
+
 		cmp		al, 2
 		jl		silent
 		cmp		al, 13
@@ -117,7 +142,6 @@ catch_09h	proc	far
 			add		di, ax
 			mov		ax, [di]
 			shr		ax, 2
-			call	print_int2
 			jmp		sound_lbl
 
 		second_octave:
@@ -128,7 +152,6 @@ catch_09h	proc	far
 			add		di, ax
 			mov		ax, [di]
 			shr		ax, 3
-			call print_int2
 			jmp		sound_lbl
 
 		third_octave:
@@ -139,7 +162,6 @@ catch_09h	proc	far
 			add		di, ax
 			mov		ax, [di]
 			shr		ax, 4
-			call print_int2
 			jmp		sound_lbl
 
 		forth_octave:
@@ -150,12 +172,9 @@ catch_09h	proc	far
 			add		di, ax
 			mov		ax, [di]
 			shr		ax, 5
-			call print_int2
 			jmp		sound_lbl
 
-
 		sound_lbl:
-			call print_int2
 			call	sound
 		pop ax
 
@@ -206,19 +225,15 @@ catch_09h	proc	far
 				add		di, 2
 			loop	int9_print_digit
 		pop		ax
-
-		cmp		al, 39h				; Если это пробел - выведем сообщение
-		jne		int9_continue2
-		;je		nosnd
-		;cmp		al, 80h				; Если это пробел - выведем сообщение
-		;jl		int9_continue2
 		
-		;nosnd:
-		call	no_sound
-		mov es:[00h], 0C53h
-		mov es:[02h], 0C74h
-		mov es:[04h], 0C6Fh
-		mov es:[06h], 0C70h
+
+		cmp al, 39h
+		jne int9_continue2
+			call no_sound
+			mov es:[00h], 0C53h
+			mov es:[02h], 0C74h
+			mov es:[04h], 0C6Fh
+			mov es:[06h], 0C70h
 		
 	int9_continue2:
 		mov		di,		tail
