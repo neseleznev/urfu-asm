@@ -107,7 +107,7 @@ catch_09h	proc	far
 		cmp		al, 54
 		jle		forth_octave
 		
-		call silent
+		jmp silent
 
 		first_octave:
 		push ax
@@ -208,11 +208,12 @@ catch_09h	proc	far
 		pop		ax
 
 		cmp		al, 39h				; Если это пробел - выведем сообщение
-		je		nosnd
-		cmp		al, 80h				; Если это пробел - выведем сообщение
-		jl		int9_continue2
+		jne		int9_continue2
+		;je		nosnd
+		;cmp		al, 80h				; Если это пробел - выведем сообщение
+		;jl		int9_continue2
 		
-		nosnd:
+		;nosnd:
 		call	no_sound
 		mov es:[00h], 0C53h
 		mov es:[02h], 0C74h
