@@ -1,8 +1,7 @@
-; 09 handler, работает, восстанавливает
-; По нажатию пробела сообщение, по нажатию эск выход
-; + < 190 bytes
-; Записывать в видео-память
-; Есть Low-Memory Usage (449, 44A)
+; Никита Селезнев, ФИИТ-301, 2015
+;
+; Первый опыт работы со звуком
+
 .286
 .model tiny
 .code
@@ -14,14 +13,10 @@ ORG 100h
 
 @entry:		jmp @start
 
-
-include SexyPrnt.inc			; >= 1.3.1
-
-buffer		db		100h dup (?) 
+buffer		db		10h dup (?) 
 head		dw		0
 tail		dw		0
 old_09h		dw		?, ?
-
 notes		dw		1046, 1109, 1175, 1244, 1318, 1397, 1480, 1568, 1661, 1720, 1867, 1975
 
 
@@ -68,8 +63,8 @@ no_sound endp
 
 
 drugs_magic_delay proc
+	; Вход dx = [1..64k] - задержка
 	pusha
-	mov dx, 4
 	DMD_loop:
 		mov cx, 0FFFFh
 		DMD_delay:
@@ -82,7 +77,7 @@ drugs_magic_delay proc
 drugs_magic_delay endp
 
 
-catch_09h	proc	far
+catch_09h:
 	; in  - read from port
 	; out - write to port
 		in		al,	60h				; скан-код последней нажатой (из 60 порта)
@@ -90,6 +85,7 @@ catch_09h	proc	far
 		cmp al, 130
 		jl cont
 			; some magic
+			;mov		dx, 4
 			;call drugs_magic_delay
 			; staccato
 			;call no_sound
@@ -135,47 +131,47 @@ catch_09h	proc	far
 		
 		jmp silent
 
-		first_octave:
-			sub		ax, 2
-			shl		ax, 1
-			mov 	di, offset notes
-			add		di, ax
-			mov		ax, [di]
-			shr		ax, 2
-			jmp		sound_lbl
+	first_octave:
+		sub		ax, 2
+		shl		ax, 1
+		mov 	di, offset notes
+		add		di, ax
+		mov		ax, [di]
+		shr		ax, 2
+		jmp		sound_lbl
 
-		second_octave:
-			sub		ax, 16
-			shl		ax, 1
-			mov 	di, offset notes
-			add		di, ax
-			mov		ax, [di]
-			shr		ax, 3
-			jmp		sound_lbl
+	second_octave:
+		sub		ax, 16
+		shl		ax, 1
+		mov 	di, offset notes
+		add		di, ax
+		mov		ax, [di]
+		shr		ax, 3
+		jmp		sound_lbl
 
-		third_octave:
-			sub		ax, 30
-			shl		ax, 1
-			mov 	di, offset notes
-			add		di, ax
-			mov		ax, [di]
-			shr		ax, 4
-			jmp		sound_lbl
+	third_octave:
+		sub		ax, 30
+		shl		ax, 1
+		mov 	di, offset notes
+		add		di, ax
+		mov		ax, [di]
+		shr		ax, 4
+		jmp		sound_lbl
 
-		forth_octave:
-			sub		ax, 44
-			shl		ax, 1
-			mov 	di, offset notes
-			add		di, ax
-			mov		ax, [di]
-			shr		ax, 5
-			jmp		sound_lbl
+	forth_octave:
+		sub		ax, 44
+		shl		ax, 1
+		mov 	di, offset notes
+		add		di, ax
+		mov		ax, [di]
+		shr		ax, 5
+		jmp		sound_lbl
 
-		sound_lbl:
-			call	sound
+	sound_lbl:
+		call	sound
 
 
-		silent:
+	silent:
 		pop ax
 		cmp		al, 81h				; Если это отжатие клавиши Esc
 		jne		int9_continue1		; Завершим выполнение программы
@@ -195,10 +191,10 @@ catch_09h	proc	far
 		jmp		int9_continue2
 		
 	int9_continue1:
-;		mov		ax, 3     ; text mode 80x25, 16 colors, 8 pages (ah=0, al=3)
-;		int		10h       ; do it!
-;		mov		ax, 0500h
-;		int		10h
+		;mov		ax, 3     ; text mode 80x25, 16 colors, 8 pages (ah=0, al=3)
+		;int		10h       ; do it!
+		;mov		ax, 0500h
+		;int		10h
 		push     0B800h
 		pop     es
 
@@ -252,7 +248,6 @@ catch_09h	proc	far
 		mov		al,		20h
 		out		20h,	al			; аппаратному контроллеру нужен сигнал ....
 		iret
-catch_09h	endp
 
 
 @start:
