@@ -17,24 +17,14 @@ old_09h		dw		?, ?
 old_1Ch		dw		?, ?
 l_button	dw		0
 
-include	SexyPrnt.inc
+;include	SexyPrnt.inc
 
 print_int_3chars proc
 	; Вход: ax - число
 	pusha
-		mov		cx,	3
 	PiVM_next:
-		mov		si, cx
-		;mov		ax, 3     ; text mode 80x25, 16 colors, 8 pages (ah=0, al=3)
-		;int		10h       ; do it!
-		;mov		ax, 0500h
-		;int		10h
-		
-		;push	0B800h
-		;pop		es
-
 		mov		bx, 10
-		mov		cx, si
+		mov		cx, 3
 		int9_bite_off:
 			xor		dx, dx
 			div		bx			; ax = ax / 10
@@ -42,14 +32,10 @@ print_int_3chars proc
 		loop	int9_bite_off
 
 		mov		ah, 02h
-		mov		cx, si
-		;xor		di, di
+		mov		cx, 3
 		int9_print_digit:
 			pop		dx
-			add		dl, '0'
-			;mov		es:[di],	dl
-			;mov		es:[di+1],	0Ah
-			;add		di, 2
+			add		dl,	'0'
 			int		21h
 		loop	int9_print_digit
 	popa
@@ -126,17 +112,25 @@ catch_09h:
 
 		cmp		bx,	2				; Нажата правая кнопка мыши
 		je		main_loop_exit
-		 
-		mov		ax, dx ; Y coord to ax
-		call	print_int_3chars
-		call print_space
-	 
-		mov		ax,	cx ; X coord to ax
-		call	print_int_3chars
 
-		mov		cx,	7
+		cmp		bx,	1
+		jne		@main_loop
+		 
+		mov		ax, dx				; Y coord to ax
+		call	print_int_3chars
+				
+		mov		dx, 20h				; '123' + ' '
+		mov		ax, 0200h
+		int		21h
+
+		mov		ax,	cx				; X coord to ax
+		call	print_int_3chars	; + '456'
+
+		mov		cx,	7				; Потом печатаем backspace	
+		mov		dx, 08h				; cx=7 раз
+		mov		ax, 0200h
 		clean_up:
-			call	print_backspace
+			int		21h
 			loop	clean_up
 
 		;mov		ah,	0Bh
