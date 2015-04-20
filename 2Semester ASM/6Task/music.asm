@@ -85,8 +85,8 @@ catch_09h:
 		cmp al, 130
 		jl cont
 			; some magic
-			;mov		dx, 4
-			;call drugs_magic_delay
+			mov		dx, 4
+			call drugs_magic_delay
 			; staccato
 			;call no_sound
 			mov es:[00h], 0C53h
