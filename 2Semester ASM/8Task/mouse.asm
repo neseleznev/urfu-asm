@@ -1,13 +1,11 @@
-; ����� ��������, ����-301, 2015
-; ���� ���� ࠡ��� � ��㪮�
-; ������ ��⨬���஢����� � ��饭��� ����� piano
-
+; Никита Селезнев, ФИИТ-301, 2015
+; Работа с мышью.
+; Программа работает в 4 графическом видео-режиме,
+; отрисовывая в левом верхнем углу координаты мыши.
+; По нажатию Esc или правой кнопки мыши - выход.
 .286
 .model tiny
 .code
-ORG 80h
-	cmd_len		label byte		; ����� ��㬥�⮢ ��������� ��ப�
-	cmd_line	label byte		; ��㬥��� ��������� ��ப�
 ORG 100h
 
 @entry:		jmp		@start
@@ -17,17 +15,51 @@ head		dw		0
 tail		dw		0
 old_09h		dw		?, ?
 old_1Ch		dw		?, ?
-prompt		db		'���ந�������� ��㪮� ��אַ㣮�쭮� ����� �१ PC-ᯨ���.'					,0Ah,0Dh
-			db		'�ᯮ�짮�����: TODO player.com [䠩�], �ଠ� ���ண� ���ᠭ � README.TXT'	,0Ah,0Dh
-			db		'+ 㢥����� ⥬�, - 㬥����� ⥬�, Escape - ��室.'							,0Ah,0Dh,'$'
 l_button	dw		0
 
 include	SexyPrnt.inc
-include	ChVideo.inc
+
+print_int_3chars proc
+	; Вход: ax - число
+	pusha
+		mov		cx,	3
+	PiVM_next:
+		mov		si, cx
+		;mov		ax, 3     ; text mode 80x25, 16 colors, 8 pages (ah=0, al=3)
+		;int		10h       ; do it!
+		;mov		ax, 0500h
+		;int		10h
+		
+		;push	0B800h
+		;pop		es
+
+		mov		bx, 10
+		mov		cx, si
+		int9_bite_off:
+			xor		dx, dx
+			div		bx			; ax = ax / 10
+			push	dx			; dx = ax % 10
+		loop	int9_bite_off
+
+		mov		ah, 02h
+		mov		cx, si
+		;xor		di, di
+		int9_print_digit:
+			pop		dx
+			add		dl, '0'
+			;mov		es:[di],	dl
+			;mov		es:[di+1],	0Ah
+			;add		di, 2
+			int		21h
+		loop	int9_print_digit
+	popa
+	ret
+print_int_3chars endp
+
 
 catch_09h:
 	push	ax
-		in		al,	60h				; ᪠�-��� ��᫥���� ����⮩ (�� 60 ����)
+		in		al,	60h				; скан-код последней нажатой (из 60 порта)
 
 		mov		di,		tail
 		mov		buffer[di],	al
@@ -46,25 +78,15 @@ catch_09h:
 		and		al,		07Fh
 		out		61h,	al
 		mov		al,		20h
-		out		20h,	al			; �����⭮�� ����஫���� �㦥� ᨣ��� ....
+		out		20h,	al			; аппаратному контроллеру нужен сигнал ....
 	pop		ax
 	iret
 
-catch_l_button:
-	mov		l_button, 1
-	retf
-
-
 @start:
-	;mov		ah, 09h
-	;lea		dx, prompt
-	;int		21h
-	mov		al, 4
-	call	change_video_mode
-	mov		al, 0
-	call	change_display_page
+	mov		ax, 4 				; 4 видео-режим (графический)
+	int		10h
 
-	; ��⠭���� ��ࠡ��稪 INT 09h � ��࠭�� ����
+	; Установим обработчик INT 09h и сохраним старый
 	mov		ax, 3509h
 	int		21h
 	mov		[old_09h],	bx
@@ -75,79 +97,71 @@ catch_l_button:
 		int		21h
 	sti
 
-	mov		ax,	00
-	int		33h ; mouse interrupt
-	; (if AX=FFFFh mouse is installed, if 0000 not, DX - number of mouse buttons)
-
-	cmp ax,	0
-	ja @music_box ; if AX &gt; 0 lets start!
-
-	mov ah,4ch
-	int 21h ;else just exit
-	 	 
-	mov ax,01 
-	int 33h
-
-	mov		ax, 0000Ch
-	mov		cx, 8
-	lea		dx, catch_l_button
-	push	cs
-	pop		es
+	mov		ax,	00				; Инициализация мыши
 	int		33h
+	; Результат: ax: FFFFh - мышь не установлена. 0000 - Установлена
+	;            dx: Число кнопок на мыши
+	cmp		ax,	0
+	ja		@main_loop
+	ret
 
-@music_box:
+;	mov		ax,	01				; Сделать курсор видимым
+;	int		33h
+
+@main_loop:
 
 	get_scan_code:
-		;mov		ax, l_button
-		;call print_int2
-
-		cmp		l_button, 1
-		je		music_box_exit
-
 		mov		di,	tail
 		mov		al,	buffer[di-1]
 
-		cmp		al, 81h				; �᫨ �� �⦠⨥ ������ Esc
-		je		music_box_exit		; �����訬 �믮������ �ணࠬ��
+		cmp		al, 81h				; Если это отжатие клавиши Esc
+		je		main_loop_exit		; Завершим выполнение программы
+	
 	smth:
+		mov		ax,	01				; Сделать курсор видимым
+		int		33h
+		
+		mov		ax,	03				; Обработка события мыши и кнопок
+		int		33h
 
-		mov ax,03 ; function to get mouse position and buttons
-		int 33h
+		cmp		bx,	2				; Нажата правая кнопка мыши
+		je		main_loop_exit
 		 
-		mov ax, dx ; Y coord to AX
-			;call print_int2
-			;call print_space
-		mov dx, 320
-		 
-		mul dx ; multiply AX by 320
-		add ax,cx ; add X coord 
-			push ax
-			mov ax, cx
-			;call print_int2
-			;call CRLF
-			pop ax
+		mov		ax, dx ; Y coord to ax
+		call	print_int_3chars
+		call print_space
+	 
+		mov		ax,	cx ; X coord to ax
+		call	print_int_3chars
 
-		; (Now currsor position is in AX, lets draw the pixel there)
-		;mov di,ax
-		;mov ax,0B800h
-		;mov es,ax
-		;mov dl,12 ; red color ;)
-		;mov es:[di],dl ; and we have the pixel drawn
+		mov		cx,	7
+		clean_up:
+			call	print_backspace
+			loop	clean_up
 
-		;By default mouse resolution is 640x200, lets set it to 320x200 (monitor height is already set, lets just set the width)
-		;mov ax, 7
-		;mov cx,0 ; min pos
-		;mov dx,640 ; max pos
-		;int 33h
+		;mov		ah,	0Bh
+		;mov		bh,	00h 
+		;mov		bl, 1001b
+		;int		10h
 
-		jmp		@music_box
+		;mov		ah, 09h
+		;mov		al, 'F'
+		;mov		bh, 0
+		;mov		bl, 0100b
+		;mov		cx,	1
+		;int		10h
 
-	music_box_exit:
-		; �몫�稬 �������
-		in		al, 61h
-		and		al, not 3
-		out 	61h, al
-		; ����⠭�������� ����� 09h
+		;mov		ax, 0B800h				; Адрес сегмента видео-буфера 4 режимов
+		;mov		es, ax					; Установим сегмент видео-буфера
+		;mov		bh, 0Ch
+		;mov		bl, 'F'
+		;xor		di,	di
+		;mov		es:[di], bx
+
+		jmp		@main_loop
+
+	main_loop_exit:
+		; Восстанавливаем вектор 09h
 		mov		ax, 2509h
 		mov		dx, word ptr cs:[old_09h]
 		mov		ds, word ptr cs:[old_09h+2]
