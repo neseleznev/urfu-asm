@@ -17,6 +17,9 @@
 ;
 ; Смотри пример использования player.asm
 ;
+
+ticks		dw		0
+
 catch_1Ch:
 	add		ticks, 1
 	iret
@@ -63,15 +66,15 @@ play_note proc
 		call print_space
 		pop	ax
 
-		cmp		ah,	8
-		jg		PN_error
-		cmp		cx,	1
-		jl		PN_error
-		jmp		PN_calculate_frequency
-	PN_error:
-		popa
-		stc
-		ret
+		;cmp		ah,	8
+		;jg		PN_error
+		;cmp		cx,	1
+		;jl		PN_error
+		;jmp		PN_calculate_frequency
+	;PN_error:
+		;popa
+		;stc
+		;ret
 
 	PN_calculate_frequency:
 		push	cx
@@ -159,11 +162,6 @@ play_note proc
 		PN_delay_loop:
 			cmp		ticks, ax
 			jl		PN_delay_loop
-		
-	PN_sound_off:
-		in		al, 61h
-		and		al, not 3
-		out 	61h, al
 	popa
 	clc
 	ret

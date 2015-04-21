@@ -14,7 +14,6 @@ head		dw		0
 tail		dw		0
 old_09h		dw		?, ?
 old_1Ch		dw		?, ?
-ticks		dw		0
 notes		dw		4186, 4435, 4698, 4978, 5276, 5588, 5920, 6272, 6664, 6880, 7458, 7902
 prompt		db		'Воспроизведение звуков прямоугольной волны через PC-спикер.'					,0Ah,0Dh
 			db		'Использование: TODO player.com [файл], формат которого описан в README.TXT'	,0Ah,0Dh
@@ -24,15 +23,6 @@ Handle		dw		?									; Handle файла
 current_note	db	'$','$','$','$','$','$','$'
 file_not_found_msg	db	'Файл не найден!'															,'$'
 access_denied_msg	db	'Недостаточно прав для чтения файла!'										,'$'
-
-duration	db		1,      4, 4, 4, 4, 2,4,    4, 2,4,    4, 2,4,    4, 4, 4, 4, 4, 1
-len			dw		$-duration
-
-melody2		db		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-octave2		db		3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3
-duration2	db		1, 4, 2, 4, 3, 4, 4, 4, 6, 4, 8, 4,12, 4,16, 4,24, 4,32
-len2		dw		$-duration2 
-
 
 include	SexyPrnt.inc
 include	Sound.inc
@@ -62,37 +52,12 @@ catch_09h:
 	pop		ax
 	iret
 
-
-char_to_int10 proc						; Перевод символа в число
+char_to_note proc						; Перевод 2х символов в ноту
 	; Вход:
-	;     al = Символ
+	; ah = Нота [A, B, C, D, E, F, G]
+	; al = ['b', '#', ' '] (напр, 'F#', 'Db', 'G ')
 	; Результат:
-	;     al = число [0...9]
-	; Ошибка:
-	;     Флаг CF = 1
-	;     Некорректный символ или основание системы счисления
-		cmp		al, 48
-		jl		AI10_incorrect
-		sub		al, 48	; '0' -> 0
-		cmp		al, 10
-		jge		AI10_incorrect
-	AI10_success:
-		clc
-		ret
-	AI10_incorrect:
-		stc
-		ret	
-char_to_int10 endp
-
-char_to_note proc						; Перевод символа в ноту
-	; Вход:
-	;     ah = Нота [A, B, C, D, E, F, G]
-	;     al = ['b', '#', ' '] (напр, 'F#', 'Db', 'G ')
-	; Результат:
-	;     al = число [0...11]
-		push	bx
-		mov		bl, al
-
+	; al = число [0...11]
 		cmp		ah,	'B'
 		jle		CtN_AB
 		cmp		ah,	'E'
@@ -102,39 +67,38 @@ char_to_note proc						; Перевод символа в ноту
 
 	CtN_AB:
 		sub		ah, 'A'
-		mov		al, ah
-		xor		ah, ah
 		shl		ax, 1
-		add		ax, 9
+		add		ah, 9
 		jmp		CtN_diez_bemole
 	CtN_CDE:
 		sub		ah, 'C'
-		mov		al, ah
-		xor		ah, ah
 		shl		ax, 1
 		jmp		CtN_diez_bemole
 	CtN_FG:
 		sub		ah, 'F'
-		mov		al, ah
-		xor		ah, ah
 		shl		ax, 1
-		add		ax, 5
+		add		ah, 5
 		;jmp	CtN_diez_bemole
 	CtN_diez_bemole:
-		cmp		bl, 'b'
-		je		CtN_bemole
-		cmp		bl, '#'
+		push	bx
+		mov		bl, ah
+		shr		ax, 1
+		mov		ah, bl
+		pop		bx
+		cmp		al, 'b'
+	je CtN_bemole
+		cmp		al, '#'
 		je		CtN_diez
 		jmp		CtN_exit
 	CtN_bemole:
-		dec		ax
+		dec		ah
 		jmp		CtN_exit
 	Ctn_diez:
-		inc		ax
+		inc		ah
 		;jmp	CtN_exit
 	CtN_exit:
-		pop		bx
-		ret	
+		mov		al, ah
+		ret
 char_to_note endp
 
 char_to_duration proc					; Перевод символа в продолжительность
@@ -145,24 +109,24 @@ char_to_duration proc					; Перевод символа в продолжительность
 	; Результат:
 	;     bl = число [1,2,(3),4,(6),8,(12),16,(24),32]
 	push ax
-	push cx
-		call	char_to_int10
-		jnc		CtD_double_digit
+		cmp		al, ' '
+		jne		CtD_double_digit
 
 		mov		al,	ah
-		call	char_to_int10
 		xor		ah,	ah
+		sub		al,	'0'
 		jmp		CtD_optional_dot
 
 	CtD_double_digit:
+		sub		al,	'0'
 		push	cx
-		mov		cl, al
-		mov		al,	ah
-		call	char_to_int10
+			mov		cl, al
+			mov		al,	ah
+			sub		al,	'0'
 
-		mov		dl,	10
-		mul		dl
-		add		al,	cl
+			mov		dl,	10
+			mul		dl
+			add		al,	cl
 		pop		cx
 
 	CtD_optional_dot:
@@ -176,36 +140,10 @@ char_to_duration proc					; Перевод символа в продолжительность
 		add		ax,	dx
 	CtD_exit:
 		mov		bl,	al
-		pop cx
 		pop ax
 		ret	
 char_to_duration endp
 
-
-file_errors:
-	cmp		ax,	2
-	je		file_not_found
-	cmp		ax,	3
-	je		file_not_found	; path
-	cmp		ax,	4
-	je		file_not_found
-	cmp		ax,	5
-	je		access_denied
-	cmp		ax,	6
-	je		file_not_found
-	cmp		ax,	12
-	je		access_denied
-
-	file_not_found:
-		lea		dx, file_not_found_msg
-		jmp		print_and_exit
-	access_denied:
-		lea		dx, access_denied_msg
-		;jmp	print_and_exit
-	print_and_exit:
-		mov		ah,	09h
-		int		21h
-		ret
 
 @start:
 	mov		ah, 09h
@@ -222,8 +160,21 @@ file_errors:
 		int		21h
 		jnc		set_pointer_to_file
 
-		file_errors_trace1:
-			jmp	file_errors
+		cmp		ax,	4
+		jle		file_not_found
+		; 5, 12
+		access_denied:
+			lea		dx, access_denied_msg
+			jmp		print_and_exit
+		; 1, 2, 3, 4
+		file_not_found:
+			lea		dx, file_not_found_msg
+			jmp		print_and_exit
+		print_and_exit:
+			mov		ah,	09h
+			int		21h
+			ret
+
 	; Устанавливаем указатель в начало файла
 	set_pointer_to_file:
 		mov		Handle, ax
@@ -232,7 +183,6 @@ file_errors:
 		xor		cx, cx		; позицию 0*64K + 0
 		xor		dx, dx
 		int		21h
-		jc		file_not_found
 
 	; Установим обработчик INT 09h и сохраним старый
 	mov		ax, 3509h
@@ -255,34 +205,30 @@ file_errors:
 		int		21h
 	sti
 
-	mov		ah, 3Fh				; Читаем
-	mov		bx, Handle			;   из файла
-	mov		cx, 6				;     6 байт
-	lea		dx, current_note	;       в буфер current_note
-	int		21h
-	jnc		parse_bpm
-
-	file_errors_trace2:
-		jmp		file_errors_trace1
-
 	parse_bpm:
+		mov		ah, 3Fh				; Читаем
+		mov		bx, Handle			;   из файла
+		mov		cx, 5				;     6 байт
+		lea		dx, current_note	;       в буфер current_note
+		int		21h
+
 		; TODO optimize
 		xor		cx,	cx				; cx = bpm =
 		mov		dl,	10
 
 		mov		al,	current_note[0]
-		call	char_to_int10
+		sub		al,	'0'
 		mul		dl
 		mul		dl
 		add		cx,	ax				;            [0]*100
 
 		mov		al,	current_note[1]
-		call	char_to_int10
+		sub		al,	'0'
 		mul		dl
 		add		cx,	ax				;              + [1]*10
 
 		mov		al,	current_note[2]
-		call	char_to_int10
+		sub		al,	'0'
 		add		cx,	ax				;                + [2]
 
 @music_box:
@@ -306,11 +252,9 @@ file_errors:
 			lea		dx,	current_note	;       в буфер current_note
 			int		21h
 		pop	cx
-		jc		file_errors_trace2
 
 		test	ax,	ax
 		jz		music_box_exit
-
 								lea dx, current_note
 								call print_dx_string
 
@@ -318,9 +262,8 @@ file_errors:
 								call print_int2
 								call print_close_bracket
 								call CRLF
-
 		mov		al,	current_note[0]
-		call	char_to_int10
+		sub		al,	'0'
 		mov		dh, al
 
 		mov		ah, current_note[1]
@@ -338,9 +281,9 @@ file_errors:
 
 		jmp		@music_box
 	
-	music_box_increase:				; Увеличим темп на 6,25%
+	music_box_increase:				; Увеличим темп на 12,5%
 		mov		ax,	cx
-		shr		ax, 4
+		shr		ax, 3
 		add		cx,	ax
 		jmp		lets_play
 
