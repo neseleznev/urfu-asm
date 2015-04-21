@@ -2,7 +2,7 @@
 ;        УрФУ, ФИИТ-301, 2015
 ;
 ; Мини-библиотека для работы со звуком
-; Sound 0.0.3 (от 22.04.2015)
+; Sound 0.0.3short (от 22.04.2015)
 ;
 ; Для работы процедур необходимо иметь скалярую переменную ticks,
 ; а так же установить обработчик прерывания 1C catch_1C
@@ -59,24 +59,7 @@ play_note proc
 	;     cx = bpm (размер 4/4, т.е. число 1/4 нот в минуту)
 	; Результат:
 	;     Ошибка CF=1, при недопустимом входе
-	pusha		
-		push ax
-		mov	al, ah
-		xor ah, ah
-		call print_int2
-		call print_space
-		pop	ax
-
-		;cmp		ah,	8
-		;jg		PN_error
-		;cmp		cx,	1
-		;jl		PN_error
-		;jmp		PN_calculate_frequency
-	;PN_error:
-		;popa
-		;stc
-		;ret
-
+	pusha
 	PN_calculate_frequency:
 		push	cx
 		xor		cx,	cx
@@ -91,8 +74,6 @@ play_note proc
 		mov		ax, [di]		; Частота ноты в пятой октаве
 
 		shr		ax, cl			; Переведем в нужную октаву
-		call print_int2
-		call print_space
 		pop		cx
 
 	PN_sound_on:
@@ -158,12 +139,9 @@ play_note proc
 		cli
 			div		cx		;	ax = (ax/bx) * FREQ / cx
 		sti
-		call print_int2
-		call CRLF
 		PN_delay_loop:
 			cmp		ticks, ax
 			jl		PN_delay_loop
 	popa
-	clc
 	ret
 play_note endp
