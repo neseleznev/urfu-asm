@@ -5,6 +5,9 @@
 .286
 .model tiny
 .code
+ORG 80h
+	cmd_len		label byte		; Длина аргументов командной строки
+	cmd_line	label byte		; Аргументы командной строки
 ORG 100h
 
 @entry:		jmp		@start
@@ -14,11 +17,10 @@ head		dw		0
 tail		dw		0
 old_09h		dw		?, ?
 old_1Ch		dw		?, ?
-notes		dw		4186, 4435, 4698, 4978, 5276, 5588, 5920, 6272, 6664, 6880, 7458, 7902
 prompt		db		'Воспроизведение звуков прямоугольной волны через PC-спикер.'					,0Ah,0Dh
 			db		'Использование: TODO player.com [файл], формат которого описан в README.TXT'	,0Ah,0Dh
 			db		'+ увеличить темп, - уменьшить темп, Escape - выход.'							,0Ah,0Dh,'$'
-FileName	db		'C:\2Semes~1\6Task\123.txt',0	; файл для чтения
+FileName	db		100 dup (0)
 Handle		dw		?									; Handle файла
 current_note	db	'$','$','$','$','$','$','$'
 file_not_found_msg	db	'Файл не найден!'															,'$'
@@ -81,12 +83,12 @@ char_to_note proc						; Перевод 2х символов в ноту
 		;jmp	CtN_diez_bemole
 	CtN_diez_bemole:
 		push	bx
-		mov		bl, ah
-		shr		ax, 1
-		mov		ah, bl
+			mov		bl, ah
+			shr		ax, 1
+			mov		ah, bl
 		pop		bx
 		cmp		al, 'b'
-	je CtN_bemole
+		je CtN_bemole
 		cmp		al, '#'
 		je		CtN_diez
 		jmp		CtN_exit
@@ -101,7 +103,7 @@ char_to_note proc						; Перевод 2х символов в ноту
 		ret
 char_to_note endp
 
-char_to_duration proc					; Перевод символа в продолжительность
+char_to_duration proc					; Перевод символа в длительность
 	; Вход:
 	;     ah = Первый символ
 	;     al = Второй символ
@@ -154,6 +156,17 @@ char_to_duration endp
 	mov		bx,	4000h
 	call	reprogram_pit
 
+	parse_cmd_arg:
+		xor		cx,	cx
+		mov		cl,	cmd_len					; Длина cx - длина ком.стр.
+		jcxz	file_not_found
+		lea		si,	cmd_line				; Источник si - ком.стр.,
+		dec		cx							;   ( пропустим байт длины и пробел,
+		add		si,	2						;     уменьшив длину и сместив указатель )
+		lea		di,	FileName				; Приемник di - FileName
+		cld									; В прямом направлении
+		rep		movsb
+	
 	open_file:
 		mov		ax, 3D00h
 		lea		dx, FileName
