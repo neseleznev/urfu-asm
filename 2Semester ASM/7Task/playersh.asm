@@ -12,145 +12,148 @@ ORG 100h
 
 @entry:		jmp		@start
 
-buffer		db		10h dup (?) 
-head		dw		0
-tail		dw		0
+esc_pressed db 		0
 old_09h		dw		?, ?
 old_1Ch		dw		?, ?
-prompt		db		'playersh.com [файл], формат описан в README.TXT. Escape - выход'	,0Ah,0Dh,'$'
-FileName	db		30 dup (0)
+prompt		db		'playersh.com [имя файла]. Escape - выход'	,0Ah,0Dh,'$'
+FileName	db		12 dup (0)
 Handle		dw		?
-current_note	db	'$','$','$','$','$','$','$'
+current_note	db	'$'
 file_error_msg	db	'Ошибка файла! Проверьте расположение и права доступа'						,'$'
 
-
 ticks		dw		0
-notes		dw		4186, 4435, 4698, 4978, 5276, 5588, 5920, 6272, 6664, 6880, 7458, 7902
 
 
 catch_1Ch:
 	add		ticks, 1
 	iret
 
-; перепрограммирует канал 0 системного таймера на новую частоту
-reprogram_pit		proc
-	;     bx = делитель частоты
-	cli							; запретить прерывания
-		mov		al,	00110110b	; канал 0, запись младшего и старшего байт
-								; режим работы 3, формат счетчика - двоичный
-		out		43h,al           ; послать это в регистр команд первого таймера
-		mov		al,	bl            ; младший байт делителя -
-		out		40h,al           ; в регистр данных канала 0
-		mov		al,	bh            ; и старший байт -
-		out		40h,al           ; туда же
-	sti                         ; теперь IRQO вызывается с частотой
-	                            ; 1 193 180/ВХ Hz
-	ret
-reprogram_pit		endp
 
-
-play_note proc					; Играть ноту заданной частоты, октавы и длительности
+play_note_compressed	proc
+	; Укороченная версия play_note из Sound.inc (В предположении, что делитель частоты 4000h)
+	; Играть ноту заданной частоты, октавы и длительности
+	; 
+	; Вход:
+	;     ah = октава (смотри get_note_freq)
+	;     al = нота   (аналогично)
+	;     bl = длительность (смотри delay_duration)
+	;     cx = bpm (если размер 4/4, то число 1/4 нот в минуту)
 	pusha
-	PN_calculate_frequency:
-		push	cx
-		xor		cx,	cx
-		mov		cl,	ah
-		sub		cx, 8			; cx = степень двойки - делителя
-		neg		cx				;      частоты пятой октавы
-
-		xor		ah,	ah
-		shl		ax, 1
-		mov		di, offset notes
-		add		di, ax
-		mov		ax, [di]		; Частота ноты в пятой октаве
-
-		shr		ax, cl			; Переведем в нужную октаву
-		pop		cx
-
-	PN_sound_on:
-		pusha
-		mov		bx, ax
-		mov		ax, 34ddh
-		mov		dx, 12h ; частота = 1234DDh (1191340) / параметр
-		cmp		dx, bx
-		jnb		PN_sound_on_fail	; jnl знаковое
-		div		bx
-		mov		bx, ax
-
-		in		al, 61h
-		or		al, 3
-		out		61h, al
-
-		mov		al, 10000110b
-		mov		dx, 43h
-		out		dx, al
-		dec		dx
-		mov		al, bl
-		out		dx, al
-		mov		al, bh
-		out		dx, al
-		PN_sound_on_fail:
-		popa
-
-	PN_delay:
-		xor		bh,	bh
-		mov		ticks, 0
-		cmp		bx, 3
-		je		PN_delay_long
-		cmp		bx, 6
-		je		PN_delay_long
-		cmp		bx, 12
-		je		PN_delay_long
-		cmp		bx, 24
-		je		PN_delay_long
-		jmp		PN_delay_2_n
-
-		PN_delay_long:		; 3 -> (3/8)n, 6 -> (3/16)n
-		mov		ax, bx
-		mov		bx,	3
-		xor		dx,	dx
-		cli
+	
+	PN_get_note_freq:
+		push bx
+			push cx
+				push dx
+			xchg	cx,	ax
+			cmp		cl,	11			; Нота = max{Нота, 11}
+			jbe		PN_ok_note
+			mov		cl,	11
+		PN_ok_note:
+			mov		ax,	7
+			mov		dx,	0B78Ah+23
+			mov		bx,	61858
+		PN_1:
+			xchg	dx,	ax
 			div		bx
-		sti
-		shl		ax, 3		; a = 3, b = 8*(bx/3)
-		xchg	ax, bx
-		jmp		PN_delay_ready
+			push	ax
+			div		bx
+			xchg	ax,	dx
+			pop		ax
+			dec		cl
+			jns		PN_1
 
-		PN_delay_2_n:
-		mov		ax, 1
+			cmp		ch,	9
+			jbe		PN_2
+			mov		ch,	9
+		PN_2:
+			shl		dx,	1
+			rcl		ax,	1
+			dec		ch
+			jns		PN_2
+			shl		dx,	1
+			adc		ax,	0
+				pop dx
+			pop cx
+		pop bx
 
-		PN_delay_ready:
-		mov		dx, 17474	; Число тиков сист.таймера для	(TODO тут делитель частоты в 4 раза)
-							; целой ноты при bpm=1
-			mul		dx		;	dx:ax = (ax * FREQ)
-		cli
-			div		bx		;	ax = (ax/bx) * FREQ
-		sti
-		xor		dx, dx		; ax = dx:ax / cx
-		cli
-			div		cx		;	ax = (ax/bx) * FREQ / cx
-		sti
-		PN_delay_loop:
-			cmp		ticks, ax
-			jl		PN_delay_loop
+	PN_play_sound:
+		pusha
+			mov		dx,	12h
+			cmp		ax,	dx			; Частота <= 18 Гц ?
+			jbe		PN_play_sound_end; Да, на выход, чтобы избежать переполнения
+			xchg	cx,	ax			; Сохраняем частоту в СX
+			mov		al,	10110110b	; Упр.сл.таймера: канал 2, режим 3, дв.слово
+			out		43h,al			; Выводим в регистр режима
+			mov		ax,	34DDh		; DX:AX = 1193181
+			div		cx				; AX = (DX:AX) / СX
+			out		42h,al			; Записываем младший байт счетчика
+			mov		al,	ah
+			out		42h,al			; Записываем старший байт счетчика
+			in		al,	61h			; Порт PB
+			or		al,	11b			; Устанавливаем биты 0-1
+			out		61h,al			; Записываем обратно в PB
+		PN_play_sound_end:
+			popa
+
+	PN_delay_duration:
+		mov		ticks, 0
+		
+		xor		bh,	bh
+		cmp		bl, 3
+		je		PN_DD_long
+		cmp		bx, 6
+		je		PN_DD_long
+		cmp		bx, 12
+		je		PN_DD_long
+		cmp		bx, 24
+		je		PN_DD_long
+		cmp		bx, 48		; Любая другая воспринимается как 1/n
+		je		PN_DD_long		; например, 98 - 1/98 нота
+		jmp		PN_DD_2_n		; not bug but feature ;)
+
+		PN_DD_long:				; 3 -> (3/8)n, 6 -> (3/16)n
+			mov		ax, bx
+			mov		bx,	3
+			xor		dx,	dx
+			cli
+				div		bx		; ax = (dx:ax) / 3 = bx / 3
+			sti
+			shl		ax, 3		; a = 3, b = 8*(bx/3)
+			xchg	ax, bx
+			jmp		PN_DD_ready
+
+		PN_DD_2_n:
+			mov		ax, 1
+
+		PN_DD_ready:
+			mov		dx, 17474	; Число тиков сист.таймера для	(тут делитель частоты в 4 раза)
+								; целой ноты при bpm=1
+			; Сейчас ax/bx - длительность ноты относительно целой (например, 1/2 1/4 3/8 и т.д.)
+			mul		dx			;	dx:ax = (ax * CNT_TICKS)
+			cli
+			div		bx			;	ax = (ax/bx) * CNT_TICKS
+			sti
+			xor		dx, dx
+			cli
+			div		cx			;	ax = (ax/bx) * CNT_TICKS / cx(bpm)
+			sti
+			;call print_int2
+			;call CRLF
+		PN_DD_loop:				; Теперь в ax необходимое число тиков таймера
+			cmp		ticks, ax	; Подождём их...
+			jl		PN_DD_loop
+
 	popa
 	ret
-play_note endp
+play_note_compressed	endp
 
 
 catch_09h:
 	push	ax
 		in		al,	60h				; скан-код последней нажатой (из 60 порта)
-
-		mov		di,		tail
-		mov		buffer[di],	al
-		inc		tail
-		and		tail,	0Fh
-		mov		ax,		tail
-		cmp		head,	ax
+		cmp		al, 81h
 		jne		@catch_09h_put
-		inc		head
-		and		head,	0Fh
+		mov		esc_pressed,	1
 
 	@catch_09h_put:
 		in		al,		61h
@@ -266,7 +269,16 @@ char_to_duration endp
 
 	; Делитель частоты (стандартно FFFFh - 18.2 раза в секунду)
 	mov		bx,	4000h
-	call	reprogram_pit
+	cli							; запретить прерывания
+		mov		al,	00110110b	; канал 0, запись младшего и старшего байт
+								; режим работы 3, формат счетчика - двоичный
+		out		43h,al           ; послать это в регистр команд первого таймера
+		mov		al,	bl            ; младший байт делителя -
+		out		40h,al           ; в регистр данных канала 0
+		mov		al,	bh            ; и старший байт -
+		out		40h,al           ; туда же
+	sti                         ; теперь IRQO вызывается с частотой
+	                            ; 1 193 180/ВХ Hz
 
 	parse_cmd_arg:
 		xor		cx,	cx
@@ -324,7 +336,7 @@ char_to_duration endp
 	parse_bpm:
 		mov		ah, 3Fh				; Читаем
 		mov		bx, Handle			;   из файла
-		mov		cx, 5				;     6 байт
+		mov		cx, 5				;     5 байт
 		lea		dx, current_note	;       в буфер current_note
 		int		21h
 
@@ -346,12 +358,11 @@ char_to_duration endp
 		sub		al,	'0'
 		add		cx,	ax				;                + [2]
 
+
 @music_box:
 
 	get_scan_code:
-		mov		di,	tail
-		mov		al,	buffer[di-1]
-		cmp		al, 81h				; Если это отжатие клавиши Esc
+		cmp		esc_pressed, 1		; Если это отжатие клавиши Esc
 		je		music_box_exit		; Завершим выполнение программы
 
 	lets_play:
@@ -381,7 +392,7 @@ char_to_duration endp
 		call	char_to_duration		; bl = продолжительность (код)
 		mov		ah,	dh					; ah = октава
 		mov		al,	dl					; al = нота
-		call	play_note
+		call	play_note_compressed
 
 		jmp		@music_box
 
@@ -408,6 +419,6 @@ char_to_duration endp
 		mov		ah, 3Eh
 		mov		bx, Handle
 		int		21h
-		ret
+	ret
 
 end		@entry

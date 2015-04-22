@@ -16,7 +16,6 @@ buffer		db		10h dup (?)
 head		dw		0
 tail		dw		0
 old_09h		dw		?, ?
-old_1Ch		dw		?, ?
 prompt		db		'Воспроизведение звуков прямоугольной волны через PC-спикер.'					,0Ah,0Dh
 			db		'Использование: TODO player.com [файл], формат которого описан в README.TXT'	,0Ah,0Dh
 			db		'+ увеличить темп, - уменьшить темп, Escape - выход.'							,0Ah,0Dh,'$'
@@ -155,10 +154,6 @@ char_to_duration endp
 	lea		dx, prompt
 	int		21h
 
-	; Делитель частоты (стандартно FFFFh - 18.2 раза в секунду)
-	mov		bx,	4000h
-	call	reprogram_pit
-
 	parse_cmd_arg:
 		xor		cx,	cx
 		mov		cl,	cmd_len					; Длина cx - длина ком.стр.
@@ -210,16 +205,6 @@ char_to_duration endp
 	cli
 		int		21h
 	sti
-	; Установим обработчик INT 1Сh и сохраним старый
-	mov		ax, 351Ch
-	int		21h
-	mov		[old_1Ch],	bx
-	mov		[old_1Ch+2],es
-	mov		ax, 251Ch
-	mov		dx, offset catch_1Ch
-	cli
-		int		21h
-	sti
 
 	parse_bpm:
 		mov		ah, 3Fh				; Читаем
@@ -247,6 +232,8 @@ char_to_duration endp
 		sub		al,	'0'
 		add		cx,	ax				;                + [2]
 
+	call	init_play_note
+
 @music_box:
 
 	get_scan_code:
@@ -273,10 +260,6 @@ char_to_duration endp
 		jz		music_box_exit
 								lea dx, current_note
 								call print_dx_string
-
-								call print_open_bracket
-								call print_int2
-								call print_close_bracket
 								call CRLF
 		mov		al,	current_note[0]
 		sub		al,	'0'
@@ -293,7 +276,7 @@ char_to_duration endp
 		call	char_to_duration		; bl = продолжительность (код)
 		mov		ah,	dh					; ah = октава
 		mov		al,	dl					; al = нота
-		call	play_note
+		call	play_note_compressed
 
 		jmp		@music_box
 	
@@ -310,21 +293,11 @@ char_to_duration endp
 		jmp		lets_play
 
 	music_box_exit:
-		; Выключим динамик
-		in		al, 61h
-		and		al, not 3
-		out 	61h, al
+		call	stop_play_note
 		; Восстанавливаем вектор 09h
 		mov		ax, 2509h
 		mov		dx, word ptr cs:[old_09h]
 		mov		ds, word ptr cs:[old_09h+2]
-		cli
-			int		21h
-		sti
-		; Восстанавливаем вектор 1Ch
-		mov		ax, 251Ch
-		mov		dx, word ptr cs:[old_1Ch]
-		mov		ds, word ptr cs:[old_1Ch+2]
 		cli
 			int		21h
 		sti
