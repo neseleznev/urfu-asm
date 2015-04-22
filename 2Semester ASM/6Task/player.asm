@@ -1,6 +1,7 @@
 ; Никита Селезнев, ФИИТ-301, 2015
 ; Первый опыт работы со звуком
-; Слегка оптимизированная и упрощенная версия piano
+; TODO 1) fix .-bug
+;      2) fix 16-bug
 
 .286
 .model tiny
@@ -21,7 +22,7 @@ prompt		db		'Воспроизведение звуков прямоугольной волны через PC-спикер.'					,0
 			db		'Использование: TODO player.com [файл], формат которого описан в README.TXT'	,0Ah,0Dh
 			db		'+ увеличить темп, - уменьшить темп, Escape - выход.'							,0Ah,0Dh,'$'
 FileName	db		100 dup (0)
-Handle		dw		?									; Handle файла
+Handle		dw		?
 current_note	db	'$','$','$','$','$','$','$'
 file_not_found_msg	db	'Файл не найден!'															,'$'
 access_denied_msg	db	'Недостаточно прав для чтения файла!'										,'$'
@@ -84,6 +85,7 @@ char_to_note proc						; Перевод 2х символов в ноту
 	CtN_diez_bemole:
 		push	bx
 			mov		bl, ah
+			xor		ah,	ah
 			shr		ax, 1
 			mov		ah, bl
 		pop		bx
