@@ -2,15 +2,10 @@
 ;        УрФУ, ФИИТ-301, 2015
 ;
 ; Мини-библиотека для работы со звуком
-; Sound 0.0.1 (от 20.04.2015)
+; Sound 0.2.0 (от 20.04.2015)
 ;
 ; Для работы процедур необходимо иметь скалярую переменную ticks,
-; а так же установить обработчик прерывания 1C catch_1C
-;
-; Процедура умеет отлавливать ошибки, устанавливая флаг CF, если
-;     - Указана недопустимая октава
-;     - Указана недопустимая нота
-;     - TODO длительность
+; а так же установить обработчик прерывания 1C - catch_1C
 ;
 ; Зависимости:
 ;     Нет
@@ -25,100 +20,121 @@ catch_1Ch:
 	add		ticks, 1
 	iret
 
-; процедура reprogram_pit
-; перепрограммирует канал 0 системного таймера на новую частоту
-reprogram_pit      proc    near
-	; Вход:
+reprogram_pit	proc			; Перепрограммирует канал 0 системного таймера
+	; Вход:                     ; на новую частоту
 	;     bx = делитель частоты
 	cli							; запретить прерывания
 		mov		al,	00110110b	; канал 0, запись младшего и старшего байт
 								; режим работы 3, формат счетчика - двоичный
-		out		43h,al           ; послать это в регистр команд первого таймера
-		mov		al,	bl            ; младший байт делителя -
-		out		40h,al           ; в регистр данных канала 0
-		mov		al,	bh            ; и старший байт -
-		out		40h,al           ; туда же
-	sti                         ; теперь IRQO вызывается с частотой
-	                            ; 1 193 180/ВХ Hz
+		out		43h,al			; послать это в регистр команд первого таймера
+		mov		al,	bl			; младший байт делителя -
+		out		40h,al			; в регистр данных канала 0
+		mov		al,	bh			; и старший байт -
+		out		40h,al			; туда же
+	sti							; теперь IRQO вызывается с частотой 1 193 180/ВХ Hz
 	ret
-reprogram_pit      endp
+reprogram_pit	endp
 
 
-play_note proc
+sound			proc			; Включить звук
+	; Вход:
+	;     AX = частота звука (Гц)
+	pusha
+		mov		dx,	12h
+		cmp		ax,	dx			; Частота <= 18 Гц ?
+		jbe		sound_end		; Да, на выход, чтобы избежать переполнения
+		xchg	cx,	ax			; Сохраняем частоту в СX
+		mov		al,	10110110b	; Упр.сл.таймера: канал 2, режим 3, дв.слово
+		out		43h,al			; Выводим в регистр режима
+		mov		ax,	34DDh		; DX:AX = 1193181
+		div		cx				; AX = (DX:AX) / СX
+		out		42h,al			; Записываем младший байт счетчика
+		mov		al,	ah
+		out		42h,al			; Записываем старший байт счетчика
+		in		al,	61h			; Порт PB
+		or		al,	11b			; Устанавливаем биты 0-1
+		out		61h,al			; Записываем обратно в PB
+	sound_end:
+		popa
+		ret
+sound			endp
+
+
+no_sound		proc			; Отключить звук
+	push	ax
+		in		al,	61h			; Порт PB
+		and		al,	not 11b		; Сбрасываем биты 0-1
+		out		61h,al			; Записываем обратно в PB
+	pop		ax
+	ret
+no_sound		endp
+
+
+get_note_freq	proc			; Получение частоты ноты
+	; Вход:  ah = октава
+	;        al = нота
+	; Выход: ax = частота (Гц)
+	; Октавы: 0 субконтр, 1 контр, 2 большая, 3 малая, 4 первая, ..., 9 шестая
+	; Ноты:   0 до, 1 до#, 2 ре, 3 ре#, 4 ми, 5 фа, 6 фа#, 7 соль, ..., 11 си
+	;
+	; Изменение высоты на полутон - это изменение в (корень 12-й степени из 2 раз) ~= 1.059463 раз.
+	; Вычисляем частоту ноты "до" самой низкой октавы фортепиано (субконтроктавы) и получаем ~ 16.351598 Гц.
+	; Таким образом, вычисление частоты ноты сводится к простейшей процедуре:
+	;     Умножаем значение 16.351598 на 2 столько раз, на сколько нужная нам октава выше субконтроктавы.
+	;      Умножаем получившееся значение на 1.059463 столько раз, на сколько полутонов нужная нам нота выше ноты "до"
+	push bx
+		push cx
+			push dx
+		xchg	cx,	ax
+		cmp		cl,	11			; Нота = max{Нота, 11}
+		jbe		GNF_ok_note
+		mov		cl,	11
+	GNF_ok_note:
+		mov		ax,	7
+		mov		dx,	0B78Ah+23
+		mov		bx,	61858
+	GNF1:
+		xchg	dx,	ax
+		div		bx
+		push	ax
+		div		bx
+		xchg	ax,	dx
+		pop		ax
+		dec		cl
+		jns		GNF1
+
+		cmp		ch,	9
+		jbe		GNF2
+		mov		ch,	9
+	GNF2:
+		shl		dx,	1
+		rcl		ax,	1
+		dec		ch
+		jns		GNF2
+		shl		dx,	1
+		adc		ax,	0
+			pop dx
+		pop cx
+	pop bx
+	ret
+get_note_freq	endp
+
+
+play_note		proc
 	; Играть ноту заданной частоты, октавы и длительности
 	; 
 	; Вход:
-	;     ah = октава (Научная нотация:
-	;                  0 субконтр, 1 контр, 2 большая, 3 малая,
-	;                  4 первая, ..., 8 пятая)
-	;     al = нота (0 до, 1 до диез, 2 ре, ..., 11 си)
+	;     ah = октава (смотри get_note_freq)
+	;     al = нота   (аналогично)
 	;     bl = длительность (1  - целая,         2  - 1/2,
 	;                        3  - 1/4  с точкой, 4  - 1/4,
 	;                        6  - 1/8  с точкой, 8  - 1/8,
 	;                        12 - 1/16 с точкой, 16 - 1/16)
-	;     cx = bpm (размер 4/4, т.е. число 1/4 нот в минуту)
-	; Результат:
-	;     Ошибка CF=1, при недопустимом входе
-	pusha		
-		push ax
-		mov	al, ah
-		xor ah, ah
-		call print_int2
-		call print_space
-		pop	ax
+	;     cx = bpm (если размер 4/4, то число 1/4 нот в минуту)
+	pusha
 
-		;cmp		ah,	8
-		;jg		PN_error
-		;cmp		cx,	1
-		;jl		PN_error
-		;jmp		PN_calculate_frequency
-	;PN_error:
-		;popa
-		;stc
-		;ret
-
-	PN_calculate_frequency:
-		push	cx
-		xor		cx,	cx
-		mov		cl,	ah
-		sub		cx, 8			; cx = степень двойки - делителя
-		neg		cx				;      частоты пятой октавы
-
-		xor		ah,	ah
-		shl		ax, 1
-		mov		di, offset notes
-		add		di, ax
-		mov		ax, [di]		; Частота ноты в пятой октаве
-
-		shr		ax, cl			; Переведем в нужную октаву
-		call print_int2
-		call print_space
-		pop		cx
-
-	PN_sound_on:
-		pusha
-		mov		bx, ax
-		mov		ax, 34ddh
-		mov		dx, 12h ; частота = 1234DDh (1191340) / параметр
-		cmp		dx, bx
-		jnb		PN_sound_on_fail	; jnl знаковое
-		div		bx
-		mov		bx, ax
-
-		in		al, 61h
-		or		al, 3
-		out		61h, al
-
-		mov		al, 10000110b
-		mov		dx, 43h
-		out		dx, al
-		dec		dx
-		mov		al, bl
-		out		dx, al
-		mov		al, bh
-		out		dx, al
-		PN_sound_on_fail:
-		popa
+	call	get_note_freq		; ah(октава), al(нота) -> ax(частота)
+	call	sound				; ax - частота
 
 	PN_delay:
 		xor		bh,	bh
@@ -130,6 +146,8 @@ play_note proc
 		cmp		bx, 12
 		je		PN_delay_long
 		cmp		bx, 24
+		je		PN_delay_long
+		cmp		bx, 48
 		je		PN_delay_long
 		jmp		PN_delay_2_n
 
