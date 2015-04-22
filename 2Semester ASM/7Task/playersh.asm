@@ -193,6 +193,7 @@ char_to_note proc						; Перевод 2х символов в ноту
 	CtN_diez_bemole:
 		push	bx
 			mov		bl, ah
+			xor		ah,	ah
 			shr		ax, 1
 			mov		ah, bl
 		pop		bx
@@ -220,6 +221,8 @@ char_to_duration proc					; Перевод символа в длительность
 	; Результат:
 	;     bl = число [1,2,(3),4,(6),8,(12),16,(24),32]
 	push ax
+		push cx
+			push dx
 		cmp		al, ' '
 		jne		CtD_double_digit
 
@@ -230,15 +233,13 @@ char_to_duration proc					; Перевод символа в длительность
 
 	CtD_double_digit:
 		sub		al,	'0'
-		push	cx
-			mov		cl, al
-			mov		al,	ah
-			sub		al,	'0'
+		mov		cl, al
+		mov		al,	ah
+		sub		al,	'0'
 
-			mov		dl,	10
-			mul		dl
-			add		al,	cl
-		pop		cx
+		mov		dl,	10
+		mul		dl
+		add		al,	cl
 
 	CtD_optional_dot:
 		cmp		bl, '.'
@@ -251,6 +252,8 @@ char_to_duration proc					; Перевод символа в длительность
 		add		ax,	dx
 	CtD_exit:
 		mov		bl,	al
+				pop	dx
+			pop	cx
 		pop ax
 		ret	
 char_to_duration endp
