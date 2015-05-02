@@ -3,6 +3,11 @@
 ; Программа работает в 4 графическом видео-режиме,
 ; отрисовывая в левом верхнем углу координаты мыши.
 ; По нажатию Esc или правой кнопки мыши - выход.
+
+; Змейка
+; 10h video-mode
+; 
+;
 .286
 .model tiny
 .code
@@ -14,34 +19,13 @@ ORG 100h
 ;head		dw		0
 ;tail		dw		0
 char		db		0
+color		db		0Fh
 old_09h		dw		?, ?
+x			dw		?
+y			dw		?
 ;old_1Ch		dw		?, ?
 
-;include	SexyPrnt.inc
-
-print_int_3chars proc
-	; Вход: ax - число
-	pusha
-	PiVM_next:
-		mov		bx, 10
-		mov		cx, 3
-		int9_bite_off:
-			xor		dx, dx
-			div		bx			; ax = ax / 10
-			push	dx			; dx = ax % 10
-		loop	int9_bite_off
-
-		mov		ah, 02h
-		mov		cx, 3
-		int9_print_digit:
-			pop		dx
-			add		dl,	'0'
-			int		21h
-		loop	int9_print_digit
-	popa
-	ret
-print_int_3chars endp
-
+include	SexyPrnt.inc
 
 catch_09h:
 	push	ax
@@ -92,8 +76,9 @@ catch_09h:
 	ja		@main_loop
 	ret
 
-;	mov		ax,	01				; Сделать курсор видимым
-;	int		33h
+	mov		ax,	01				; Сделать курсор видимым
+	int		33h
+
 
 @main_loop:
 
@@ -103,6 +88,8 @@ catch_09h:
 		mov		al, char
 		cmp		al, 81h				; Если это отжатие клавиши Esc
 		je		main_loop_exit		; Завершим выполнение программы
+		cmp		al, 39h				; Если это нажатие клавиши пробел
+		je		change_color		; Сменим цвет
 	
 	smth:
 		mov		ax,	01				; Сделать курсор видимым
@@ -118,22 +105,68 @@ catch_09h:
 		jne		@main_loop			; печатаем координаты 
 	
 	print_coords:
-		mov		ax, dx				; Y coord to ax
-		call	print_int_3chars
-				
-		mov		dx, 20h				; '123' + ' '
-		mov		ax, 0200h
-		int		21h
+		mov		x,	cx
+		mov		y,	dx
 
-		mov		ax,	cx				; X coord to ax
-		call	print_int_3chars	; + '456'
+		mov		ah,	02h				; cursor to
+		xor		bh,	bh				; Page #0
+		xor		dx,	dx				; Row #0, Column #0
+		int		10h
 
-		mov		cx,	7				; Потом печатаем backspace	
-		mov		dx, 08h				; cx=7 раз
-		mov		ax, 0200h
-		clean_up:
-			int		21h
-			loop	clean_up
+		mov		bx, 10				; 10 - система счисления
+
+		mov		ax,	x
+		;call print_int2
+		mov		cx, 3
+		x_bite_off:
+			xor		dx, dx
+			div		bx			; ax = ax / 10
+			add		dl,	'0'
+			push	dx			; dx = ax % 10
+		loop	x_bite_off
+
+		mov		dl,	' '
+		push	dx
+
+		mov		ax,	y
+		mov		cx, 3
+		y_bite_off:
+			xor		dx, dx
+			div		bx			; ax = ax / 10
+			add		dl,	'0'
+			push	dx			; dx = ax % 10
+		loop	y_bite_off
+
+		mov		ah, 0Eh
+		mov		cx, 7			; cx=7 символов
+		Pi_print_digit:
+			pop		dx			; al <- char
+			mov 	al, dl
+			;call print_al_char
+			xor		bh,	bh		; page #0
+			mov		bl,	color
+			push cx
+				mov cx, 1		; 1 раз
+				int 10h
+			pop cx
+		loop	Pi_print_digit
+		
+		jmp		draw_pixel
+
+	change_color:
+		;mov		al,	color
+		;inc		al
+		;mov		color,	al
+		add		color,	1
+		jmp		@main_loop	
+	draw_pixel:
+		shr		cx,	1
+		dec		cx
+		dec		dx
+		mov		ah,	0Ch
+		mov		al,	color
+		mov		bh,	0
+		int		10h
 
 		;mov		ah,	0Bh
 		;mov		bh,	00h 
@@ -164,6 +197,9 @@ catch_09h:
 		cli
 			int		21h
 		sti
+		; Скрывам курсор
+		mov		ah,	02h
+		int		33h
 		ret
 
 end		@entry
