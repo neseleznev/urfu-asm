@@ -23,39 +23,40 @@ snake	            dw  0100h
                     dw  0200h
                     dw  100h  dup('?')
 score               dw  2
-food_eaten                dw  0             ; Счетчик съеденных
+;food_eaten          dw  0             ; Счетчик съеденных
 direction           dw  0100h         ; xx;yy
-speed_multiplier    dw  0
+;speed_multiplier    dw  0
 
-thickness           dw  8             ; Толщина линий и размер клетки
+;thickness           dw  8             ; Толщина линий и размер клетки
 
-color_poo           db  06h
+;color_poo           db  06h
 color_food           db  0Ah
 color_snake           db  02h;0Bh
 color_border           db  03h;0Ch
-color_mushroom           db  0Eh;0Ch
-color_speed_up           db  0Ch
-color_speed_down           db  0Bh
+;color_mushroom           db  0Eh;0Ch
+;color_speed_up           db  0Ch
+;color_speed_down           db  0Bh
 
 str_score           db  'Score: ','$'
 str_score_len       db  $-str_score-1
 
 str_classic         db  'Classic game','$'
 str_classic_len     db  $-str_classic
-str_left            db  '[TODO left]','$'
-str_left_len        db  $-str_left
-str_right           db  '[TODO right]','$'
-str_right_len       db  $-str_right
+;str_left            db  '[TODO left]','$'
+;str_left_len        db  $-str_left
+;str_right           db  '[TODO right]','$'
+;str_right_len       db  $-str_right
 str_exit            db  'Exit','$'
 str_exit_len        db  $-str_exit
-str_tutor_classic   db  'Apple   Poo   Mushroom   Chilli   Ice','$'
+str_tutor_classic   db  'Apple(grow up)    Esc - Exit','$'
+;   Poo(die)   Mushroom(majestic trash TODO)','$'
 
 RND_const           dw  8405h         ; multiplier value
 RND_seed1           dw  ?
 RND_seed2           dw  ?             ; random number seeds
 
 include SexyPrnt.inc
-include Sound.inc
+;include Sound.inc
 
 randgen proc
     ; ax = Конец диапазона [0...ax]
@@ -66,16 +67,19 @@ randgen proc
         push dx
         push ds
 
-        push    ax
-        mov     ah, 00h
-        int     1Ah
-        xor     dh, dh
-        add     RND_seed2, dx
-        shr     RND_seed2, 1
+        ;push    ax
+        ;mov     ah, 00h
+        ;int     1Ah
+        ;xor     dh, dh
+        ;add     RND_seed2, dx
+        ;shr     RND_seed2, 1
         ;call CRLF
         ;mov ax, dx
-        ;call print_int2
-        pop     ax
+        ;call print_int_3chars
+        ;call print_backspace
+        ;call print_backspace
+        ;call print_backspace
+        ;pop     ax
 
         push    ax
         push    cs
@@ -232,8 +236,8 @@ add_food proc
         pop dx
         pop cx
 
-        cmp     al, color_poo     ; Кака
-        je      AF_collision
+        ;cmp     al, color_poo     ; Кака
+        ;je      AF_collision
         cmp     al, color_food     ; Яблочко
         je      AF_collision
         cmp     al, color_snake     ; Сама змея
@@ -242,6 +246,7 @@ add_food proc
         je      AF_collision      ;Если занято, повторяем
 
     pop ax
+    ;    mov     al, color_food - можно убрать аргумент al функции, если она будет рисовать только яблочки
         call    draw_snake_pixel
         jmp     AF_end
     AF_collision:
@@ -257,28 +262,6 @@ add_food endp
 
 
 game_over proc
-    push dx
-    mov ah, 02h 
-    xor bh, bh
-    xor dx, dx
-    int 10h
-    
-    push cx
-    mov cx, 20
-    llll:
-        ;call print_space
-        loop llll
-    pop cx
-
-    int 10h
-    
-    mov ax, cx
-    ;call print_int2
-    ;call print_space
-    pop dx
-    mov ax, dx
-    ;call print_int2
-    ;call print_space
     ; Проверяем границы поля
         cmp     cx, 78
         jge     GO_exit
@@ -298,31 +281,23 @@ game_over proc
         pop dx
         pop cx
         
-        cmp     al, color_speed_up         ; Speed-up
-        je      GO_increase_speed
-        cmp     al, color_speed_down         ; Speed-down
-        je      GO_decrease_speed
+        ;cmp     al, color_speed_up         ; Speed-up
+        ;je      GO_increase_speed
+        ;cmp     al, color_speed_down         ; Speed-down
+        ;je      GO_decrease_speed
         cmp     al, color_border         ; Стенка
         je      GO_exit
-        cmp     al, color_poo         ; Какашки
-        je      GO_exit
+        ;cmp     al, color_poo         ; Какашки
+        ;je      GO_exit
         cmp     al, color_snake         ; Змейка
         je      GO_exit
         jmp     GO_good
-    GO_increase_speed:
-        inc     speed_multiplier
-        inc     speed_multiplier
-        ;jmp     GO_good
-    GO_decrease_speed:
-        dec     speed_multiplier
-        pusha
-        mov     bx, 0FFFFh
-        mov     ax, 02000h
-        mul     speed_multiplier
-        sub     bx, ax
-        call    reprogram_pit
-        popa
-        jmp     GO_good
+    ;GO_increase_speed:
+    ;    inc     speed_multiplier
+    ;    jmp     GO_good
+    ;GO_decrease_speed:
+    ;    dec     speed_multiplier
+    ;    jmp     GO_good
     GO_exit:
         call terminate_program
     GO_good:
@@ -331,25 +306,25 @@ game_over endp
 
 terminate_program proc
 
-    call    stop_play_note  
-    mov     bx, 0FFFFh
-    call    reprogram_pit
+    ;call    stop_play_note  
+    ;mov     bx, 0FFFFh
+    ;call    reprogram_pit
         mov     ah, 00h
         mov     al, 10h
         int     10h
 
         mov     ah, 00h
-        mov     al, 3;original_videomode
+        mov     al, 3; TODO original_videomode
         int     10h
         mov     ah, 05h
-        mov     al, original_videopage
+        mov     al, 0; TODO original_videopage
         int     10h
         mov     ax, 4c00h
         int     21h
         ret
 terminate_program endp
 
-draw_borderEZ proc
+draw_border  proc
     mov     ah, 0Ch         ; Function Draw Pixel
     mov     al, color_border         
     xor     bh, bh          ; Page 0
@@ -382,72 +357,7 @@ draw_borderEZ proc
         jl      DB_left_right_yEZ
 
     ret
-draw_borderEZ endp
-
-draw_border proc
-    mov     ah, 0Ch         ; Function Draw Pixel
-    mov     al, color_border         
-    xor     bh, bh          ; Page 0
-
-    ; x coord
-    push    ax
-        mov     ax, 640     ; Ширина экрана
-        mul     thickness   ; * толщину линии 
-        add     ax, thickness; [Для левой границы](толщина)
-        dec     ax          ; -1
-        xchg    cx, ax
-    pop     ax
-    ; y coord
-    mov     dx, 15          ; Припуск для счёта и прочего
-
-    DB_top:
-        int     10h
-        loop DB_top
-    int     10h             ; Самый первый пиксель (Потому что cx=0 break)
-
-
-    ; x coord
-    push    ax
-        mov     ax, 640     ; Ширина экрана
-        mul     thickness   ; * толщину линии 
-        dec     ax          ; - 1
-        xchg    cx, ax
-    pop     ax
-    ; y coord
-    mov     dx, 350 - 15
-    sub     dx, thickness
-
-    DB_bottom:
-        int     10h
-        loop    DB_bottom
-    int     10h
-
-
-    mov     dx, 15
-    add     dx, thickness
-
-    DB_left_right_y:
-        mov     cx, 640
-        sub     cx, thickness
-        DB_left_right_x:
-            int     10h
-            inc     cx
-            push    ax
-            mov     ax, 640
-            add     ax, thickness
-            cmp     cx, ax  ; 640 + thickness
-            pop     ax
-            jl      DB_left_right_x
-        inc     dx
-        push    ax
-        mov     ax, 350 - 15
-        sub     ax, thickness
-        cmp     dx, ax
-        pop     ax
-        jl      DB_left_right_y
-
-    ret
-draw_border endp
+draw_border  endp
 
 
 draw_snake_pixel    proc
@@ -496,27 +406,21 @@ init_snake  endp
 
 
 @start:
-
-    call    init_play_note
-    mov     bx, 0FFFFh
-    call    reprogram_pit
-
     mov     ah, 0Fh
     int     10h
     mov     original_videomode, al
     mov     original_videopage, bh
 
-    xor ah, ah
-    mov al, original_videomode
-    call print_int2
-    call CRLF
-    mov al, original_videopage
-    call print_int2
-    call CRLF
+    ;xor ah, ah
+    ;mov al, original_videomode
+    ;call print_int2
+    ;call CRLF
+    ;mov al, original_videopage
+    ;call print_int2
+    ;call CRLF
     ;ret
 
 @draw_menu:
-
     mov     ax, 0010h
     int	    10h 			;Очищаем игровое поле
 
@@ -563,42 +467,42 @@ init_snake  endp
     int     21h
 
     ; (влево)
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию dl,dh
-    mov     dl, str_left_len ; Вычтем длину строки
-    neg     dl              ; из
-    add     dl, 40-3        ; середины экрана - 3 символа для стрелки
-    mov     dh, 7
-    int     10h
-    mov     ah, 09h         ; Строка
-    lea     dx, str_left
-    int     21h
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; 
-    mov     dl, 40-3
-    mov     dh, 7
-    int     10h
-    mov     ah, 02h
-    mov     dl, 17          ; Стрелка влево
-    int     21h
+    ;mov     ah, 02h         ; Курсор
+    ;xor     bh, bh          ; в позицию dl,dh
+    ;mov     dl, str_left_len ; Вычтем длину строки
+    ;neg     dl              ; из
+    ;add     dl, 40-3        ; середины экрана - 3 символа для стрелки
+    ;mov     dh, 7
+    ;int     10h
+    ;mov     ah, 09h         ; Строка
+    ;lea     dx, str_left
+    ;int     21h
+    ;mov     ah, 02h         ; Курсор
+    ;xor     bh, bh          ; 
+    ;mov     dl, 40-3
+    ;mov     dh, 7
+    ;int     10h
+    ;mov     ah, 02h
+    ;mov     dl, 17          ; Стрелка влево
+    ;int     21h
 
     ; (вправо)
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию dl,dh
-    mov     dl, 40+3        ; середины экрана
-    mov     dh, 7
-    int     10h
-    mov     ah, 09h         ; Строка
-    lea     dx, str_right
-    int     21h
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; 
-    mov     dl, 40+1
-    mov     dh, 7
-    int     10h
-    mov     ah, 02h
-    mov     dl, 16          ; Стрелка вправо
-    int     21h
+    ;mov     ah, 02h         ; Курсор
+    ;xor     bh, bh          ; в позицию dl,dh
+    ;mov     dl, 40+3        ; середины экрана
+    ;mov     dh, 7
+    ;int     10h
+    ;mov     ah, 09h         ; Строка
+    ;lea     dx, str_right
+    ;int     21h
+    ;mov     ah, 02h         ; Курсор
+    ;xor     bh, bh          ; 
+    ;mov     dl, 40+1
+    ;mov     dh, 7
+    ;int     10h
+    ;mov     ah, 02h
+    ;mov     dl, 16          ; Стрелка вправо
+    ;int     21h
 
 @menu_loop:
     mov     ax, 0100h
@@ -615,25 +519,21 @@ init_snake  endp
     cmp     ah, 48h
     jne     menu_not_ud
     ; Вверх - classic
-    jmp     start_classic
+    jmp     start_game
     menu_not_ud:
-        cmp     ah, 4Bh
-        jne     menu_not_udl
-        ; Влево
-        call    terminate_program
-    menu_not_udl:
-        cmp     ah, 4Dh
-        je      menu_r
+    ;    cmp     ah, 4Bh
+    ;    jne     menu_not_udl
+    ;    ; Влево
+    ;    call    terminate_program
+    ;menu_not_udl:
+    ;    cmp     ah, 4Dh
+    ;    je      menu_r
         jmp     @menu_loop
-    menu_r:
-        ; Вправо
-        call    terminate_program
+    ;menu_r:
+    ;    ; Вправо
+    ;    call    terminate_program
 
-start_classic:
-    ; Очищаем игровое поле
-    mov     ax, 0010h
-    int     10h
-
+start_game:
     ; Строка счёт
     mov     ah, 02h         ; Курсор
     xor     bh, bh          ; в позицию 0,0
@@ -644,6 +544,7 @@ start_classic:
     int     21h
     mov     ax, score
     call    print_int_3chars
+
 
     ; Справка по элементам
     mov     ah, 02h         ; Курсор
@@ -658,18 +559,12 @@ start_classic:
     mov     cx, 12
     mov     dx, -3
     call    draw_snake_pixel
-    mov     al, color_poo
-    mov     cx, 20
-    call    draw_snake_pixel
-    mov     al, color_mushroom
-    mov     cx, 26
-    call    draw_snake_pixel
-    mov     al, color_speed_up
-    mov     cx, 37
-    call    draw_snake_pixel
-    mov     al, color_speed_down
-    mov     cx, 46
-    call    draw_snake_pixel
+    ;mov     al, color_poo
+    ;mov     cx, 29
+    ;call    draw_snake_pixel
+    ;mov     al, color_mushroom
+    ;mov     cx, 40
+    ;call    draw_snake_pixel
 
     call    draw_border
     call    init_snake
@@ -685,6 +580,7 @@ start_classic:
     ;debug_superfood:
     call    add_food
     ;loop    debug_superfood
+
 @main:				;Основной цикл
     call    delay
     call    key_press
@@ -698,7 +594,7 @@ start_classic:
     xor     cx, cx
     mov     cl, dh              ; cx - x
     xor     dh, dh              ; dx - y
-    call    game_over           ; Проверки на столкновения со стенами, собой, какахой
+    call    game_over           ; Проверки на столкновения со стенами, собой и т.д.
 
     ; Яблоко
         ; Проверяем позицию
@@ -725,43 +621,39 @@ start_classic:
     inc     score
 
     ; Звук
-    mov     bx, 01000h
-    call    reprogram_pit
-    mov     ax, food_eaten
+    ;mov     bx, 04000h
+    ;call    reprogram_pit
+    ;mov     ax, food_eaten
+    ;add     ax, 2
+    ;xchg    ah, al;mov     ah, 4
+    ;mov     bl, 16;64
+    ;mov     cx, 128
+    ;call    play_note
+    ;call    no_sound
 
-    mov     ah, 2           ; 2 октава (Большая)
-    mov     bl, 16          ; 16-ая нота
-    mov     cx, 128         ; 128 bpm
-    
-    add     al, 0
-    call    play_note
-    add     al, 7
-    call    play_note
-    call    no_sound
-
-    mov     bx, 0FFFFh
-    mov     ax, 02000h
-    mul     speed_multiplier
-    sub     bx, ax
-    call    reprogram_pit
+    ;mov     bx, 0FFFFh
+    ;mov     ax, 01000h
+    ;mul     speed_multiplier
+    ;sub     bx, ax
+    ;call    reprogram_pit
 
     ; Какашки
-    inc     food_eaten
-    cmp     food_eaten, 6
-    jl      WC_not_now
-    mov     food_eaten, 0
-    mov     al, color_poo
-    mov     dx, [snake+di-2]
-    mov     cl, dh              ; cx - x
-    xor     dh, dh              ; dx - y
-    call    draw_snake_pixel
+    ;inc     food_eaten
+    ;cmp     food_eaten, 5
+    ;jl      WC_not_now
+    ;mov     food_eaten, 0
+    ;mov     al, color_poo
+    ;mov     dx, [snake+di-2]
+    ;mov     cl, dh              ; cx - x
+    ;xor     dh, dh              ; dx - y
+    ;call    draw_snake_pixel
     ;inc     speed_multiplier
     ; TODO speedup сразу
-        mov     al, color_speed_up
-    call    add_food
-        mov     al, color_speed_down
-    call    add_food
- WC_not_now:
+    ;    mov     al, color_speed_up
+    ;call    add_food
+    ;    mov     al, color_speed_down
+    ;call    add_food
+ ;WC_not_now:
     
 
  print_score:
@@ -779,11 +671,11 @@ start_classic:
     jmp     @main
     
  next:
-    mov     dx, [snake+di]
-    mov     al, 0
-    xor     cx, cx
-    mov     cl, dh
-    xor     dh, dh
+    mov     dx, [snake+di]      ; Берем координаты хвоста
+    mov     al, 0               ; Цвет - 00 - чёрный
+    xor     cx, cx              
+    mov     cl, dh              ; cx <- dh координата x
+    xor     dh, dh              ; dx <- dl координата y
     call    draw_snake_pixel
     inc     di
     inc     di
