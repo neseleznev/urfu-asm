@@ -19,7 +19,7 @@ ORG 100h
 original_videomode  db  ?
 original_videopage  db  ?
 
-snake	            dw  0100h
+snake               dw  0100h
                     dw  0200h
                     dw  100h  dup('?')
 score               dw  2
@@ -78,8 +78,8 @@ randgen proc
         pop     ax
 
         push    ax
-        push    cs
-        pop     ds
+        ;push    cs
+        ;pop     ds
         mov     ax, RND_seed1
         mov     bx, RND_seed2;load seeds
         mov     cx, ax      ; save seed
@@ -140,7 +140,7 @@ delay   proc
     ;
     pusha
         mov     ah, 0
-        int     1Ah 
+        int     1Ah
         add     dx, 3
         mov     bx, dx
     delay_loop:   
@@ -339,7 +339,7 @@ terminate_program proc
         int     10h
 
         mov     ah, 00h
-        mov     al, 3;original_videomode
+        mov     al, original_videomode
         int     10h
         mov     ah, 05h
         mov     al, original_videopage
@@ -465,10 +465,10 @@ draw_snake_pixel    proc
         mov     ah, 0Ch
         xor     bh, bh
 
-        mov     si, 7       ; Цикл по x
+        mov     si, 6;7       ; Цикл по x
         DSP_x:
             add     cx, si
-            mov     di, 7       ; Цикл по y
+            mov     di, 6;7       ; Цикл по y
             DSP_y:
                 add     dx, di
                 int 10h
@@ -685,6 +685,7 @@ start_classic:
     ;debug_superfood:
     call    add_food
     ;loop    debug_superfood
+
 @main:				;Основной цикл
     call    delay
     call    key_press
