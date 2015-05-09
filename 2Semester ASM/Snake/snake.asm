@@ -16,46 +16,33 @@ ORG 100h
 
 @entry:             jmp   @start
 
-original_videomode  db  ?
-original_videopage  db  ?
-
-snake               dw  0100h
-                    dw  0200h
-                    dw  100h  dup('?')
-score               dw  2
-food_eaten                dw  0             ; Счетчик съеденных
-direction           dw  0100h         ; xx;yy
-speed_multiplier    dw  0
-
-thickness           dw  8             ; Толщина линий и размер клетки
-
-color_poo           db  06h
-color_food           db  0Ah
-color_snake           db  02h;0Bh
-color_border           db  03h;0Ch
-color_mushroom           db  0Eh;0Ch
-color_speed_up           db  0Ch
-color_speed_down           db  0Bh
-
-str_score           db  'Score: ','$'
-str_score_len       db  $-str_score-1
-
-str_classic         db  'Classic game','$'
-str_classic_len     db  $-str_classic
-str_left            db  '[TODO left]','$'
-str_left_len        db  $-str_left
-str_right           db  '[TODO right]','$'
-str_right_len       db  $-str_right
-str_exit            db  'Exit','$'
-str_exit_len        db  $-str_exit
-str_tutor_classic   db  'Apple   Poo   Mushroom   Chilli   Ice','$'
-
-RND_const           dw  8405h         ; multiplier value
-RND_seed1           dw  ?
-RND_seed2           dw  ?             ; random number seeds
-
 include SexyPrnt.inc
 include Sound.inc
+
+;catch_09h:
+    ;pusha
+    ;    in      al, 60h             ; скан-код последней нажатой (из 60 порта)
+    ;
+    ;    mov     di,     tail
+    ;    mov     buffer[di], al
+    ;    inc     tail
+    ;    and     tail,   0Fh
+    ;    mov     ax,     tail
+    ;    cmp     head,   ax
+    ;    jne     @catch_09h_put
+    ;    inc     head
+    ;    and     head,   0Fh
+    ;
+    ;@catch_09h_put:
+    ;    in      al,     61h
+    ;    or      al,     80h
+    ;    out     61h,    al
+    ;    and     al,     07Fh
+    ;    out     61h,    al
+    ;    mov     al,     20h
+    ;    out     20h,    al          ; аппаратному контроллеру нужен сигнал ....
+    ;popa
+    ;iret
 
 randgen proc
     ; ax = Конец диапазона [0...ax]
@@ -65,17 +52,6 @@ randgen proc
         push cx
         push dx
         push ds
-
-        push    ax
-        mov     ah, 00h
-        int     1Ah
-        xor     dh, dh
-        add     RND_seed2, dx
-        shr     RND_seed2, 1
-        ;call CRLF
-        ;mov ax, dx
-        ;call print_int2
-        pop     ax
 
         push    ax
         ;push    cs
@@ -136,73 +112,20 @@ print_int_3chars proc
     ret
 print_int_3chars endp
 
-delay   proc
+;delay   proc
     ;
-    pusha
-        mov     ah, 0
-        int     1Ah
-        add     dx, 3
-        mov     bx, dx
-    delay_loop:   
-        int     1Ah
-        cmp     dx, bx
-        jl      delay_loop
-    popa
-    ret
-delay endp
-
-
-key_press proc
-    ; Процедура обработки нажатия клавиши и присваивания значения переменной direction,
-    ; отвечающей за направление головы. Управление стрелками.
-    pusha
-        mov     cx, direction
-
-        mov     ax, 0100h
-        int     16h
-        jz      KP_end           ;Без нажатия выходим
-        xor     ah, ah
-        int     16h
-        
-        cmp     ah, 1h;81h
-        je      KP_terminate
-
-        cmp     ah, 50h
-        jne     KP_not_down
-        cmp     cx, 0FFFFh       ; Сравниваем чтобы не пойти на себя
-        je      KP_end
-        mov     cx, 0001h       ; Вниз => x 0, y 1
-        jmp     KP_end
-    KP_not_down:
-        cmp     ah, 48h
-        jne     KP_not_up_down
-        cmp     cx, 0001h
-        je      KP_end
-        mov     cx, 0FFFFh      ; Вверх => x 0, y -1
-        jmp     KP_end
-    KP_not_up_down:
-        cmp     ah, 4Bh
-        jne     KP_not_up_down_left
-        cmp     cx, 0100h
-        je      KP_end
-        mov     cx, 0FF00h      ; Влево => x -1, y 0
-        jmp     KP_end
-    KP_not_up_down_left:
-        cmp     ah, 4Dh
-        jne     KP_end
-    KP_right:
-        cmp     cx, 0FF00h
-        je      KP_end
-        mov     cx, 0100h       ; Вправо => x 1, y 0
-        jmp     KP_end
-    KP_terminate:
-        popa
-        call    terminate_program
-    KP_end:
-    mov     direction, cx
-    popa
-    ret
-key_press endp
+    ;pusha
+    ;    mov     ah, 0
+    ;    int     1Ah
+    ;    add     dx, 2
+    ;    mov     bx, dx
+    ;delay_loop:   
+    ;    int     1Ah
+    ;    cmp     dx, bx
+    ;    jl      delay_loop
+    ;popa
+    ;ret
+;delay   endp
 
 
 add_food proc
@@ -337,19 +260,26 @@ terminate_program proc
         mov     ah, 00h
         mov     al, 10h
         int     10h
-
+        ; Восстанавливаем видео-режим
         mov     ah, 00h
         mov     al, original_videomode
         int     10h
         mov     ah, 05h
         mov     al, original_videopage
         int     10h
+        ; Восстанавливаем вектор 09h
+        ;mov     ax, 2509h
+        ;mov     dx, word ptr cs:[old_09h]
+        ;mov     ds, word ptr cs:[old_09h+2]
+        ;cli
+        ;    int     21h
+        ;sti
         mov     ax, 4c00h
         int     21h
         ret
 terminate_program endp
 
-draw_borderEZ proc
+draw_border proc
     mov     ah, 0Ch         ; Function Draw Pixel
     mov     al, color_border         
     xor     bh, bh          ; Page 0
@@ -382,9 +312,9 @@ draw_borderEZ proc
         jl      DB_left_right_yEZ
 
     ret
-draw_borderEZ endp
+draw_border endp
 
-draw_border proc
+draw_border_generic proc
     mov     ah, 0Ch         ; Function Draw Pixel
     mov     al, color_border         
     xor     bh, bh          ; Page 0
@@ -447,7 +377,7 @@ draw_border proc
         jl      DB_left_right_y
 
     ret
-draw_border endp
+draw_border_generic endp
 
 
 draw_snake_pixel    proc
@@ -465,10 +395,10 @@ draw_snake_pixel    proc
         mov     ah, 0Ch
         xor     bh, bh
 
-        mov     si, 6;7       ; Цикл по x
+        mov     si, 7       ; Цикл по x
         DSP_x:
             add     cx, si
-            mov     di, 6;7       ; Цикл по y
+            mov     di, 7       ; Цикл по y
             DSP_y:
                 add     dx, di
                 int 10h
@@ -501,294 +431,709 @@ init_snake  endp
     mov     bx, 0FFFFh
     call    reprogram_pit
 
-    mov     ah, 0Fh
-    int     10h
+    mov     ah, 00h             ; Установим текущее значение
+    xor     dh, dh              ; системного таймера как начальный
+    int     1Ah                 ; seed для псевдо-рандома                
+    mov     RND_seed1, dx
+    xor     dh, dh
+    int     1Ah
+    mov     RND_seed2, dx
+
+    mov     ah, 0Fh             ; Сохраним начальные видео-режим
+    int     10h                 ; и отображаемую страницу
     mov     original_videomode, al
     mov     original_videopage, bh
 
-    xor ah, ah
-    mov al, original_videomode
-    call print_int2
-    call CRLF
-    mov al, original_videopage
-    call print_int2
-    call CRLF
-    ;ret
+    mov     ax, 0010h           ; Переходим в графический режим
+    int     10h                 ; номер 10h
+    ; Установим обработчик INT 09h и сохраним старый
+    ;mov     ax, 3509h
+    ;int     21h
+    ;mov     [old_09h],  bx
+    ;mov     [old_09h+2],es
+    ;mov     ax, 2509h
+    ;mov     dx, offset catch_09h
+    ;cli
+    ;    int     21h
+    ;sti
+    call    menu
+    call    ax;classic
 
-@draw_menu:
 
-    mov     ax, 0010h
-    int	    10h 			;Очищаем игровое поле
+menu    proc
 
-    ; Классика (вверх)
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию dl,dh
-    mov     dl, str_classic_len ; Вычтем
-    shr     dl, 1           ; половину длины строки
-    neg     dl              ; из
-    add     dl, 40          ; середины экрана
-    mov     dh, 5
-    int     10h
-    mov     ah, 09h         ; Строка Классика
-    lea     dx, str_classic
-    int     21h
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию 11,40
-    mov     dl, 40-1
-    mov     dh, 6
-    int     10h
-    mov     ah, 02h
-    mov     dl, 24          ; Стрелка вверх
-    int     21h
+    menu_draw:
+        mov     bh, 1           ; Номер отображаемой страницы (далее всюду)
+        mov     ah, 05h         ; Сменить на страницу #1
+        mov     al, bh
+        int     10h
+        
+        ; Классика (вверх)
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1           ; в позицию dl,dh
+        mov     dl, str_classic_len ; Вычтем
+        shr     dl, 1           ; половину длины строки
+        neg     dl              ; из
+        add     dl, 40          ; середины экрана
+        mov     dh, 7
+        int     10h
+        mov     ah, 09h         ; Строка Классика
+        lea     dx, str_classic
+        int     21h
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1            ; в позицию 11,40
+        mov     dl, 40-1
+        mov     dh, 8
+        int     10h
+        mov     ah, 02h
+        mov     dl, 24          ; Стрелка вверх
+        int     21h
 
-    ; Выход (вниз)
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию dl,dh
-    mov     dl, str_exit_len ; Вычтем
-    shr     dl, 1           ; половину длины строки
-    neg     dl              ; из
-    add     dl, 40          ; середины экрана
-    mov     dh, 9
-    int     10h
-    mov     ah, 09h         ; Строка Выход
-    lea     dx, str_exit
-    int     21h
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию 8,40
-    mov     dl, 40-1
-    mov     dh, 8
-    int     10h
-    mov     ah, 02h
-    mov     dl, 25          ; Стрелка вниз
-    int     21h
+        ; Выход (вниз)
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1            ; в позицию dl,dh
+        mov     dl, str_exit_len ; Вычтем
+        shr     dl, 1           ; половину длины строки
+        neg     dl              ; из
+        add     dl, 40          ; середины экрана
+        mov     dh, 11
+        int     10h
+        mov     ah, 09h         ; Строка Выход
+        lea     dx, str_exit
+        int     21h
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1            ; в позицию 8,40
+        mov     dl, 40-1
+        mov     dh, 10
+        int     10h
+        mov     ah, 02h
+        mov     dl, 25          ; Стрелка вниз
+        int     21h
 
-    ; (влево)
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию dl,dh
-    mov     dl, str_left_len ; Вычтем длину строки
-    neg     dl              ; из
-    add     dl, 40-3        ; середины экрана - 3 символа для стрелки
-    mov     dh, 7
-    int     10h
-    mov     ah, 09h         ; Строка
-    lea     dx, str_left
-    int     21h
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; 
-    mov     dl, 40-3
-    mov     dh, 7
-    int     10h
-    mov     ah, 02h
-    mov     dl, 17          ; Стрелка влево
-    int     21h
+        ; (влево)
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1            ; в позицию dl,dh
+        mov     dl, str_modern_len ; Вычтем длину строки
+        neg     dl              ; из
+        add     dl, 40-3        ; середины экрана - 3 символа для стрелки
+        mov     dh, 9
+        int     10h
+        mov     ah, 09h         ; Строка
+        lea     dx, str_modern
+        int     21h
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1            ; 
+        mov     dl, 40-3
+        mov     dh, 9
+        int     10h
+        mov     ah, 02h
+        mov     dl, 17          ; Стрелка влево
+        int     21h
 
-    ; (вправо)
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию dl,dh
-    mov     dl, 40+3        ; середины экрана
-    mov     dh, 7
-    int     10h
-    mov     ah, 09h         ; Строка
-    lea     dx, str_right
-    int     21h
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; 
-    mov     dl, 40+1
-    mov     dh, 7
-    int     10h
-    mov     ah, 02h
-    mov     dl, 16          ; Стрелка вправо
-    int     21h
+        ; (вправо)
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1            ; в позицию dl,dh
+        mov     dl, 40+3        ; середины экрана
+        mov     dh, 9
+        int     10h
+        mov     ah, 09h         ; Строка
+        lea     dx, str_right
+        int     21h
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1            ; 
+        mov     dl, 40+1
+        mov     dh, 9
+        int     10h
+        mov     ah, 02h
+        mov     dl, 16          ; Стрелка вправо
+        int     21h
 
-@menu_loop:
-    mov     ax, 0100h
-    int     16h
-    jz      @menu_loop           ;Без нажатия - ждём
-    xor     ah, ah
-    int     16h
+        cmp     game_in_progress, 0
+        je      menu_loop
+        ; Восстановить игру (Esc)
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1            ; в позицию dl,dh
+        mov     dl, str_resume1_len ; Вычтем
+        shr     dl, 1           ; половину длины строки
+        neg     dl              ; из
+        add     dl, 40          ; середины экрана
+        mov     dh, 16
+        int     10h
+        mov     ah, 09h         ; Строка Выход
+        lea     dx, str_resume1
+        int     21h
 
-    cmp     ah, 50h
-    jne     menu_not_d
-    ; Вниз - выход
-    call    terminate_program
- menu_not_d:
-    cmp     ah, 48h
-    jne     menu_not_ud
-    ; Вверх - classic
-    jmp     start_classic
-    menu_not_ud:
+        mov     ah, 02h         ; Курсор
+        ;mov    bh, 1            ; в позицию dl,dh
+        mov     dl, str_resume2_len ; Вычтем
+        shr     dl, 1           ; половину длины строки
+        neg     dl              ; из
+        add     dl, 40          ; середины экрана
+        mov     dh, 18
+        int     10h
+        mov     ah, 09h         ; Строка Выход
+        lea     dx, str_resume2
+        int     21h
+
+    menu_loop:
+        ;mov     di, tail
+        ;mov     ah, buffer[di-1]
+
+        mov     ax, 0100h
+        int     16h
+        jz      menu_loop           ;Без нажатия выходим
+        xor     ah, ah
+        int     16h
+
+        cmp     game_in_progress, 0 ; Если игра  ещё не начата, то мы 
+        je      menu_not_esc        ; даже не ждем нажатия Esc для её 
+        cmp     ah, 1h              ; восстановления
+        jne     menu_not_esc
+        ; Esc - восстановить игру
+        mov     ax, 0500h           ; Сменить страницу на #0
+        int     10h                 ; т.е. вернуться к игровому полю
+        mov     ax, offset classic
+        jmp     menu_end
+     menu_not_esc:
+        cmp     ah, 50h
+        jne     menu_not_d
+        ; Вниз - выход
+        mov     ax, offset terminate_program;call    terminate_program
+        jmp     menu_end
+     menu_not_d:
+        cmp     ah, 48h
+        jne     menu_not_ud
+        ; Вверх - classic
+        mov     game_in_progress, 0  ; New classic
+        mov     ax, offset classic   ; game
+        jmp     menu_end
+     menu_not_ud:
         cmp     ah, 4Bh
         jne     menu_not_udl
-        ; Влево
-        call    terminate_program
-    menu_not_udl:
+        ; Влево - modern
+        mov     game_in_progress, 0  ; New modern
+        mov     ax, offset modern    ; game
+        jmp     menu_end
+     menu_not_udl:
         cmp     ah, 4Dh
         je      menu_r
-        jmp     @menu_loop
-    menu_r:
+        jmp     menu_loop
+     menu_r:
         ; Вправо
-        call    terminate_program
+        mov     ax, offset terminate_program;call    terminate_program
 
-start_classic:
-    ; Очищаем игровое поле
-    mov     ax, 0010h
-    int     10h
+    menu_end:
+        ret
+menu    endp
 
-    ; Строка счёт
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию 0,0
-    xor     dx, dx
-    int     10h
-    mov     ah, 09h
-    lea     dx, str_score
-    int     21h
-    mov     ax, score
-    call    print_int_3chars
 
-    ; Справка по элементам
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию 0,15
-    xor     dx, dx
-    mov     dl, 15
-    int     10h
-    mov     ah, 09h         ; Строка Счёт
-    lea     dx, str_tutor_classic
-    int     21h
-    mov     al, color_food
-    mov     cx, 12
-    mov     dx, -3
-    call    draw_snake_pixel
-    mov     al, color_poo
-    mov     cx, 20
-    call    draw_snake_pixel
-    mov     al, color_mushroom
-    mov     cx, 26
-    call    draw_snake_pixel
-    mov     al, color_speed_up
-    mov     cx, 37
-    call    draw_snake_pixel
-    mov     al, color_speed_down
-    mov     cx, 46
-    call    draw_snake_pixel
+classic proc
+    ;
+    ;
+        cmp     game_in_progress, 1
+        je      classic_main
 
-    call    draw_border
-    call    init_snake
-
-    mov     si, score		;Индекс координаты символа головы
-    dec     si
-    shl     si, 1
-    xor     di, di			;Индекс координаты символа хвоста
-    mov     direction, 0100h;direction для управления головой. dir[0] - приращение координаты x (1 или -1), dir[1] - y (1 или -1) 
-
-    mov     al, color_food
-    ;mov     cx, 0800h
-    ;debug_superfood:
-    call    add_food
-    ;loop    debug_superfood
-
-@main:				;Основной цикл
-    call    delay
-    call    key_press
-    mov     dx, [snake+si]		;Берем координату головы из памяти
-    add     dx, direction		;Изменяем координаты в зависимости от направления
-    inc     si				
-    inc     si
-    and     si, 0FFh
-    mov     [snake+si], dx		;Заносим в память новую координату головы змеи
-
-    xor     cx, cx
-    mov     cl, dh              ; cx - x
-    xor     dh, dh              ; dx - y
-    call    game_over           ; Проверки на столкновения со стенами, собой, какахой
-
-    ; Яблоко
-        ; Проверяем позицию
-        mov     ah, 0Dh         ; Read Pixel
-        xor     bh, bh
-        push cx
-        push dx
-        shl     cx, 3           ; cx*8 (ширина ячейки)
-        shl     dx, 3           ; аналогично
-        add     dx, 15          ; отступ для текста и прочего
-        add     cx, 8
-        add     dx, 8
+    classic_start:
+        ; Очищаем игровое поле
+        xor     bh, bh          ; Далее всюду страница #0
+        mov     ax, 0010h
         int     10h
-        pop dx
-        pop cx
 
-        mov     ah, al ; Сохраним цвет под головой
-        ; Когда позиция проверена, можно нарисовать там голову        
-        mov     al, color_snake
+        ; Строка счёт
+        mov     ah, 02h         ; Курсор
+        ;xor     bh, bh         ; в позицию 0,0
+        xor     dx, dx
+        int     10h
+        mov     ah, 09h
+        lea     dx, str_score
+        int     21h
+        mov     ax, score
+        call    print_int_3chars
+
+        ; Справка по элементам
+        mov     ah, 02h         ; Курсор
+        ;xor     bh, bh          ; в позицию 0,15
+        xor     dx, dx
+        mov     dl, 15
+        int     10h
+        mov     ah, 09h         ; Строка Счёт
+        lea     dx, str_tutor_classic
+        int     21h
+        mov     al, color_food
+        mov     cx, 12
+        mov     dx, -3
+        call    draw_snake_pixel
+        mov     al, color_poo
+        mov     cx, 20
         call    draw_snake_pixel
 
-        cmp     ah, color_food          ; яблочки
-    jne     next
-    inc     score
+        call    draw_border
+        call    init_snake
 
-    ; Звук
-    mov     bx, 01000h
-    call    reprogram_pit
-    mov     ax, food_eaten
+        mov     si, score       ;Индекс координаты символа головы
+        dec     si
+        shl     si, 1
+        xor     di, di          ;Индекс координаты символа хвоста
+        mov     direction, 0100h;direction для управления головой. dir[0] - приращение координаты x (1 или -1), dir[1] - y (1 или -1) 
 
-    mov     ah, 2           ; 2 октава (Большая)
-    mov     bl, 16          ; 16-ая нота
-    mov     cx, 128         ; 128 bpm
-    
-    add     al, 0
-    call    play_note
-    add     al, 7
-    call    play_note
-    call    no_sound
+        mov     al, color_food
+        ;mov     cx, 0800h
+        ;debug_superfood:
+        call    add_food
+        ;loop    debug_superfood
+        mov     game_in_progress, 1
 
-    mov     bx, 0FFFFh
-    mov     ax, 02000h
-    mul     speed_multiplier
-    sub     bx, ax
-    call    reprogram_pit
+    classic_main:               ;Основной цикл
+        ;call    delay
+        cmp     ticks, 2
+        jl      classic_main
+        mov     ticks, 0
 
-    ; Какашки
-    inc     food_eaten
-    cmp     food_eaten, 6
-    jl      WC_not_now
-    mov     food_eaten, 0
-    mov     al, color_poo
-    mov     dx, [snake+di-2]
-    mov     cl, dh              ; cx - x
-    xor     dh, dh              ; dx - y
-    call    draw_snake_pixel
-    ;inc     speed_multiplier
-    ; TODO speedup сразу
+     key_press:
+        ; Обработка нажатия клавиши и присваивания значения переменной direction,
+        ; отвечающей за направление головы. Управление стрелками.
+        pusha
+            mov     cx, direction
+
+            ;mov     ax, head
+            ;cmp     ax, tail
+            ;je      classic_main
+
+            ;mov     di, tail
+            ;mov     al, buffer[di-1]
+            mov     ax, 0100h
+            int     16h
+            jz      KP_end           ;Без нажатия выходим
+            xor     ah, ah
+            int     16h
+            xchg    ah, al
+
+            cmp     al, 1h              ; Если это отжатие клавиши Esc
+            je      KP_menu              ; Завершим выполнение программыTODO
+            cmp     al, 50h
+            je      KP_down
+            cmp     al, 48h
+            je      KP_up
+            cmp     al, 4Bh
+            je      KP_left
+            cmp     al, 4Dh
+            je      KP_right
+            jmp     KP_end
+
+            KP_down:
+            cmp     cx, 0FFFFh       ; Сравниваем чтобы не пойти на себя
+            je      KP_end
+            mov     cx, 0001h       ; Вниз => x 0, y 1
+            jmp     KP_end
+            KP_up:
+            cmp     cx, 0001h
+            je      KP_end
+            mov     cx, 0FFFFh      ; Вверх => x 0, y -1
+            jmp     KP_end
+            KP_left:
+            cmp     cx, 0100h
+            je      KP_end
+            mov     cx, 0FF00h      ; Влево => x -1, y 0
+            jmp     KP_end
+            KP_right:
+            cmp     cx, 0FF00h
+            je      KP_end
+            mov     cx, 0100h       ; Вправо => x 1, y 0
+            jmp     KP_end
+            KP_menu:
+                popa
+                call    menu
+                call    ax
+            KP_terminate:
+                popa
+                call    terminate_program
+            KP_end:
+                mov     direction, cx
+        popa
+
+        ;cmp     ticks, 2
+        ;jl      classic_main
+        ;mov     ticks, 0
+
+        ;mov     dx, direction
+        ;mov     actual_direction, dx
+        mov     dx, [snake+si]      ;Берем координату головы из памяти
+        add     dx, direction       ;Изменяем координаты в зависимости от направления
+        inc     si              
+        inc     si
+        and     si, 0FFh
+        mov     [snake+si], dx      ;Заносим в память новую координату головы змеи
+
+        xor     cx, cx
+        mov     cl, dh              ; cx - x
+        xor     dh, dh              ; dx - y
+        call    game_over           ; Проверки на столкновения со стенами, собой, какахой
+
+        ; Яблоко
+            ; Проверяем позицию
+            mov     ah, 0Dh         ; Read Pixel
+            xor     bh, bh
+            push cx
+            push dx
+            shl     cx, 3           ; cx*8 (ширина ячейки)
+            shl     dx, 3           ; аналогично
+            add     dx, 15          ; отступ для текста и прочего
+            add     cx, 8
+            add     dx, 8
+            int     10h
+            pop dx
+            pop cx
+
+            mov     ah, al ; Сохраним цвет под головой
+            ; Когда позиция проверена, можно нарисовать там голову        
+            mov     al, color_snake
+            call    draw_snake_pixel
+
+            cmp     ah, color_food          ; яблочки
+        jne     next
+        inc     score
+
+        ; Какашки
+        inc     food_eaten
+        cmp     food_eaten, 6
+        jl      WC_not_now
+        mov     food_eaten, 0
+        mov     al, color_poo
+        mov     dx, [snake+di-2]
+        mov     cl, dh              ; cx - x
+        xor     dh, dh              ; dx - y
+        call    draw_snake_pixel
+     WC_not_now:
+     print_score:
+        mov     ah, 02h         ; Курсор
+        xor     bh, bh          ; в позицию 0,0
+        xor     dx, dx
+        mov     dl, str_score_len
+        int     10h
+        
+        mov     ax, score
+        call    print_int_3chars
+
+        mov     al, color_food
+        call    add_food
+        jmp     classic_main
+        
+     next:
+        mov     dx, [snake+di]
+        mov     al, 0
+        xor     cx, cx
+        mov     cl, dh
+        xor     dh, dh
+        call    draw_snake_pixel
+        inc     di
+        inc     di
+        and     di, 0FFh
+        jmp     classic_main
+    ret
+classic endp
+
+
+modern proc
+    ;
+    ;
+        cmp     game_in_progress, 1
+        je      modern_main
+
+    modern_start:
+        ; Очищаем игровое поле
+        xor     bh, bh          ; Далее всюду страница #0
+        mov     ax, 0010h
+        int     10h
+
+        ; Строка счёт
+        mov     ah, 02h         ; Курсор
+        ;xor     bh, bh         ; в позицию 0,0
+        xor     dx, dx
+        int     10h
+        mov     ah, 09h
+        lea     dx, str_score
+        int     21h
+        mov     ax, score
+        call    print_int_3chars
+
+        ; Справка по элементам
+        mov     ah, 02h         ; Курсор
+        ;xor     bh, bh          ; в позицию 0,15
+        xor     dx, dx
+        mov     dl, 15
+        int     10h
+        mov     ah, 09h         ; Строка Счёт
+        lea     dx, str_tutor_modern
+        int     21h
+        mov     al, color_food
+        mov     cx, 12
+        mov     dx, -3
+        call    draw_snake_pixel
+        mov     al, color_poo
+        mov     cx, 20
+        call    draw_snake_pixel
+        mov     al, color_mushroom
+        mov     cx, 26
+        call    draw_snake_pixel
         mov     al, color_speed_up
-    call    add_food
+        mov     cx, 37
+        call    draw_snake_pixel
         mov     al, color_speed_down
-    call    add_food
- WC_not_now:
-    
+        mov     cx, 46
+        call    draw_snake_pixel
 
- print_score:
-    mov     ah, 02h         ; Курсор
-    xor     bh, bh          ; в позицию 0,0
-    xor     dx, dx
-    mov     dl, str_score_len
-    int     10h
-    
-    mov     ax, score
-    call    print_int_3chars
+        call    draw_border
+        call    init_snake
 
-    mov     al, color_food
-    call    add_food
-    jmp     @main
-    
- next:
-    mov     dx, [snake+di]
-    mov     al, 0
-    xor     cx, cx
-    mov     cl, dh
-    xor     dh, dh
-    call    draw_snake_pixel
-    inc     di
-    inc     di
-    and     di, 0FFh
-jmp     @main
+        mov     si, score       ;Индекс координаты символа головы
+        dec     si
+        shl     si, 1
+        xor     di, di          ;Индекс координаты символа хвоста
+        mov     direction, 0100h;direction для управления головой. dir[0] - приращение координаты x (1 или -1), dir[1] - y (1 или -1) 
+
+        mov     al, color_food
+        ;mov     cx, 0800h
+        ;debug_superfood:
+        call    add_food
+        ;loop    debug_superfood
+        mov     ticks, 0
+        mov     game_in_progress, 1
+
+    modern_main:               ;Основной цикл
+        ;call    delay
+        cmp     ticks, 2
+        jl      modern_main
+        mov     ticks, 0
+
+
+     M_key_press:
+        ; Обработка нажатия клавиши и присваивания значения переменной direction,
+        ; отвечающей за направление головы. Управление стрелками.
+        pusha
+            mov     cx, direction
+
+            ;mov     ax, head
+            ;cmp     ax, tail
+            ;je      modern_main
+
+            ;mov     di, tail
+            ;mov     al, buffer[di-1]
+            mov     ax, 0100h
+            int     16h
+            jz      M_KP_end           ;Без нажатия выходим
+            xor     ah, ah
+            int     16h
+            xchg    ah, al
+
+            cmp     al, 1h              ; Если это отжатие клавиши Esc
+            je      M_KP_menu              ; Завершим выполнение программы
+            ;cmp     al, 0Dh             ; Если это нажатие клавиши +,
+            ;je      KP_terminate  ;     увеличим темп
+            ;cmp     al, 0Ch             ; Если это отжатие клавиши -,
+            ;je      KP_terminate  ;     уменьшим темп
+            cmp     al, 50h
+            je      M_KP_down
+            cmp     al, 48h
+            je      M_KP_up
+            cmp     al, 4Bh
+            je      M_KP_left
+            cmp     al, 4Dh
+            je      M_KP_right
+            jmp     M_KP_end
+
+            M_KP_down:
+            cmp     cx, 0FFFFh       ; Сравниваем чтобы не пойти на себя
+            je      M_KP_end
+            mov     cx, 0001h       ; Вниз => x 0, y 1
+            jmp     M_KP_end
+            M_KP_up:
+            cmp     cx, 0001h
+            je      M_KP_end
+            mov     cx, 0FFFFh      ; Вверх => x 0, y -1
+            jmp     M_KP_end
+            M_KP_left:
+            cmp     cx, 0100h
+            je      M_KP_end
+            mov     cx, 0FF00h      ; Влево => x -1, y 0
+            jmp     M_KP_end
+            M_KP_right:
+            cmp     cx, 0FF00h
+            je      M_KP_end
+            mov     cx, 0100h       ; Вправо => x 1, y 0
+            jmp     M_KP_end
+            M_KP_menu:
+                popa
+                call    menu
+                call    ax
+            M_KP_terminate:
+                popa
+                call    terminate_program
+            M_KP_end:
+                mov     direction, cx
+        popa
+
+        ;cmp     ticks, 2
+        ;jl      modern_main
+        ;mov     ticks, 0
+
+        ;mov     dx, direction
+        ;mov     actual_direction, dx
+        mov     dx, [snake+si]      ;Берем координату головы из памяти
+        add     dx, direction       ;Изменяем координаты в зависимости от направления
+        inc     si              
+        inc     si
+        and     si, 0FFh
+        mov     [snake+si], dx      ;Заносим в память новую координату головы змеи
+
+        xor     cx, cx
+        mov     cl, dh              ; cx - x
+        xor     dh, dh              ; dx - y
+        call    game_over           ; Проверки на столкновения со стенами, собой, какахой
+
+        ; Яблоко
+            ; Проверяем позицию
+            mov     ah, 0Dh         ; Read Pixel
+            xor     bh, bh
+            push cx
+            push dx
+            shl     cx, 3           ; cx*8 (ширина ячейки)
+            shl     dx, 3           ; аналогично
+            add     dx, 15          ; отступ для текста и прочего
+            add     cx, 8
+            add     dx, 8
+            int     10h
+            pop dx
+            pop cx
+
+            mov     ah, al ; Сохраним цвет под головой
+            ; Когда позиция проверена, можно нарисовать там голову        
+            mov     al, color_snake
+            call    draw_snake_pixel
+
+            cmp     ah, color_food          ; яблочки
+        jne     M_next
+        inc     score
+
+        ; Звук
+        mov     bx, 01000h
+        call    reprogram_pit
+        mov     ax, food_eaten
+
+        mov     ah, 2           ; 2 октава (Большая)
+        mov     bl, 16          ; 16-ая нота
+        mov     cx, 128         ; 128 bpm
+        
+        add     al, 0
+        call    play_note
+        add     al, 7
+        call    play_note
+        call    no_sound
+
+        mov     bx, 0FFFFh
+        mov     ax, 02000h
+        mul     speed_multiplier
+        sub     bx, ax
+        call    reprogram_pit
+
+        ; Какашки
+        inc     food_eaten
+        cmp     food_eaten, 6
+        jl      M_WC_not_now
+        mov     food_eaten, 0
+        mov     al, color_poo
+        mov     dx, [snake+di-2]
+        mov     cl, dh              ; cx - x
+        xor     dh, dh              ; dx - y
+        call    draw_snake_pixel
+        ;inc     speed_multiplier
+        ; TODO speedup сразу
+            mov     al, color_speed_up
+        call    add_food
+            mov     al, color_speed_down
+        call    add_food
+     M_WC_not_now:
+        
+
+     M_print_score:
+        mov     ah, 02h         ; Курсор
+        xor     bh, bh          ; в позицию 0,0
+        xor     dx, dx
+        mov     dl, str_score_len
+        int     10h
+        
+        mov     ax, score
+        call    print_int_3chars
+
+        mov     al, color_food
+        call    add_food
+        jmp     modern_main
+        
+     M_next:
+        mov     dx, [snake+di]
+        mov     al, 0
+        xor     cx, cx
+        mov     cl, dh
+        xor     dh, dh
+        call    draw_snake_pixel
+        inc     di
+        inc     di
+        and     di, 0FFh
+        jmp     modern_main
+    ret
+modern endp
+
+
+original_videomode  db  ?
+original_videopage  db  ?
+
+game_in_progress    db  0
+score               dw  2
+food_eaten          dw  0             ; Счетчик съеденных
+direction           dw  0100h         ; xx;yy
+;actual_direction    dw  0100h         ; xx;yy
+speed_multiplier    dw  0
+
+thickness           dw  8             ; Толщина линий и размер клетки
+
+color_poo           db  06h
+color_food           db  0Ah
+color_snake           db  02h
+color_border           db  03h
+color_mushroom          db  0Eh
+color_speed_up           db  0Ch
+color_speed_down          db  0Bh
+
+str_score           db  'Score: ','$'
+str_score_len       db  $-str_score-1
+
+str_classic         db  'Classic mode','$'
+str_classic_len     db  $-str_classic
+str_modern          db  'Modern mode','$'
+str_modern_len      db  $-str_modern
+str_left            db  '[TODO left]','$'
+str_left_len        db  $-str_left
+str_right           db  '[TODO right]','$'
+str_right_len       db  $-str_right
+str_exit            db  'Exit','$'
+str_exit_len        db  $-str_exit
+str_resume1         db  'PAUSE','$'
+str_resume1_len     db  $-str_resume1
+str_resume2         db  'Esc - Resume game','$'
+str_resume2_len     db  $-str_resume2
+str_tutor_classic   db  'Apple   Poo   ','$'
+str_tutor_modern    db  'Apple   Poo   Mushroom   Chilli   Ice','$'
+
+RND_const           dw  8405h         ; multiplier value
+RND_seed1           dw  ?
+RND_seed2           dw  ?             ; random number seeds
+
+;buffer      db      10h dup (?) 
+;head        dw      0
+;tail        dw      0
+;old_09h     dw      ?, ?
+
+snake               dw  0100h
+                    dw  0200h
+                    dw  100h  dup('?')
 
 end	    @entry
