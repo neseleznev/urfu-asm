@@ -130,8 +130,6 @@ print_int_3chars    endp
 
 add_food            proc
     ; Вход: al - цвет
-    push cx
-    push dx
     push ax
         mov     ax, 78         ; Псевдо-рандомное число
         call    randgen         ; от 0 до 78
@@ -169,12 +167,8 @@ add_food            proc
         jmp     AF_end
     AF_collision:
         pop ax
-        pop dx
-        pop cx
         jmp     add_food
     AF_end:
-    pop dx
-    pop cx
     ret
 add_food            endp
 
@@ -612,6 +606,12 @@ menu                proc
         lea     dx, str_resume2
         int     21h
 
+    ; TODO Небольшая задержка - защита от случайного нажатия стрелки
+    mov     ticks, 0
+    menu_delay:               ;Основной цикл
+        cmp     ticks, 50
+        jl      menu_delay
+
     menu_loop:
         ;mov     di, tail
         ;mov     ah, buffer[di-1]
@@ -909,6 +909,8 @@ modern_init         proc
         mov     direction, 0100h;direction для управления головой. dir[0] - приращение координаты x (1 или -1), dir[1] - y (1 или -1)
         mov     food_eaten, 0
         mov     speed_multiplier, 0
+        mov     speed_ticks, 0
+        mov     mushroom_ticks, 0
         mov     bx, 0FFFFh
         call    reprogram_pit
 
@@ -934,6 +936,28 @@ modern              proc
         cmp     ticks, 2
         jl      modern_main
         mov     ticks, 0
+
+    M_extra_items:
+        cmp     speed_ticks, 0
+        je      M_no_speed
+        dec     speed_ticks
+        cmp     speed_ticks, 0
+        jne     M_no_speed
+        pusha
+            mov     al, 00h
+            mov     dx, speed_up_coord
+            mov     cl, dh
+            xor     ch, ch
+            xor     dh, dh
+            call    draw_snake_pixel
+
+            mov     dx, speed_down_coord
+            mov     cl, dh
+            xor     dh, dh
+            call    draw_snake_pixel
+        popa
+
+        M_no_speed:
 
     M_key_press:
         ; Обработка нажатия клавиши и присваивания значения переменной direction,
@@ -997,7 +1021,7 @@ modern              proc
         ;jl      modern_main
         ;mov     ticks, 0
 
-
+    M_move_snake:
         ;mov     dx, direction
         ;mov     actual_direction, dx
         mov     dx, [snake+si]      ;Берем координату головы из памяти
@@ -1025,8 +1049,21 @@ modern              proc
         popf
 
         ; Стоит ли стирать хвост? То есть съели ли яблоко?
-        jnc     M_erase_tail
+        jc      M_snake_grows
 
+    M_erase_tail:
+        mov     dx, [snake+di]
+        mov     al, 0
+        xor     cx, cx
+        mov     cl, dh
+        xor     dh, dh
+        call    draw_snake_pixel
+        inc     di
+        inc     di
+        and     di, 0FFh
+        jmp     modern_main
+    
+    M_snake_grows:
         ; Если яблоко съедено - включить звук
         mov     bx, 01000h
         call    reprogram_pit
@@ -1050,24 +1087,36 @@ modern              proc
         sub     bx, ax
         call    reprogram_pit
 
-                    mov     al, color_speed_up
-                    call    add_food
-                    mov     al, color_speed_down
-                    call    add_food
+        cmp     speed_ticks, 0  ; Если в текущий момент на экране
+        jne     M_pass_speed    ; нет чили и льда,
+        mov     ax, 5           ; с вероятностью 1/5
+        call    randgen         ; сгенерируем чили и лед
+        test    ax, ax
+        jnz     M_pass_speed
+            mov     al, color_speed_up
+            call    add_food
+            mov     dh, cl
+            mov     speed_up_coord, dx
+            mov     al, color_speed_down
+            call    add_food
+            mov     dh, cl
+            mov     speed_down_coord, dx
+            mov     speed_ticks, 100
+        M_pass_speed:
+
+        cmp     mushroom_ticks, 0; Если в текущий момент на экране
+        jne     M_pass_mushroom ; нет грибов,
+        mov     ax, 10          ; С вероятностью 1/10
+        call    randgen         ; сгенерируем грибы
+        test    ax, ax
+        jnz     M_pass_mushroom
+            mov     al, color_mushroom
+            call    add_food
+            mov     dh, cl
+            mov     mushroom_coord, dx
+            mov     mushroom_ticks, 500
+        M_pass_mushroom:
         jmp     modern_main
-        
-    M_erase_tail:
-        mov     dx, [snake+di]
-        mov     al, 0
-        xor     cx, cx
-        mov     cl, dh
-        xor     dh, dh
-        call    draw_snake_pixel
-        inc     di
-        inc     di
-        and     di, 0FFh
-        jmp     modern_main
-    ret
 modern              endp
 
 
@@ -1096,6 +1145,12 @@ color_border           db  03h
 color_mushroom          db  0Eh
 color_speed_up           db  0Ch
 color_speed_down          db  0Bh
+
+speed_up_coord      dw  ?
+speed_down_coord    dw  ?
+speed_ticks         dw  ?
+mushroom_coord      dw  ?
+mushroom_ticks      dw  ?
 
 str_score           db  'Score: ','$'
 str_score_len       db  $-str_score-1
