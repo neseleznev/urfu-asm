@@ -1,27 +1,27 @@
-; ÐÐ¸ÐºÐ¸Ñ‚Ð° Ð¡ÐµÐ»ÐµÐ·Ð½ÐµÐ², Ð¤Ð˜Ð˜Ð¢-301, 2015
-; Ð—Ð¼ÐµÐ¹ÐºÐ°
-; 1. Ð“Ñ€Ð°Ñ„Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ñ€ÐµÐ¶Ð¸Ð¼ 10h, Ð²Ð¾ÑÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°Ñ‚ÑŒ Ñ€ÐµÐ¶Ð¸Ð¼ Ð¿Ñ€Ð¸ Ð²Ñ‹Ñ…Ð¾Ð´Ðµ
-; 2. Ð’ÑÐµ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚Ñ‡Ð¸ÐºÐ¸ Ð¿Ñ€ÐµÑ€Ñ‹Ð²Ð°Ð½Ð¸Ð¹ Ð¼Ð¸Ð½Ð¸Ð¼Ð°Ð»ÑŒÐ½Ñ‹ (Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð½ÐµÐ¾Ð±Ñ…Ð¾Ð´Ð¸Ð¼Ñ‹Ð¹ ÐºÐ¾Ð´)
-; 3. Ð£Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ ÑÑ‚Ñ€ÐµÐ»ÐºÐ°Ð¼Ð¸, Ð¿Ñ€Ð¾Ð±ÐµÐ»=Ð¿Ð°ÑƒÐ·Ð°, esc=Ð²Ñ‹Ñ…Ð¾Ð´. ÐžÑÑ‚Ð°Ð»ÑŒÐ½Ð¾Ðµ Ð¿Ð¾ Ð¶ÐµÐ»Ð°Ð½Ð¸ÑŽ
-; 4. Ð—Ð¼ÐµÐ¹ÐºÐ° Ð¿Ð¾Ð»Ð·Ð°ÐµÑ‚, ÐµÑÑ‚ ÐµÐ´Ñƒ, Ñ€Ð°ÑÑ‚Ñ‘Ñ‚, ÑƒÐ¼Ð¸Ñ€Ð°ÐµÑ‚ Ð¿Ñ€Ð¸ Ð²Ñ‚Ñ‹ÐºÐ°Ð½Ð¸Ð¸ Ð² ÑÑ‚ÐµÐ½ÐºÑƒ Ð¸Ð»Ð¸ Ð² ÑÐµÐ±Ñ. Ð—Ð° ÐµÐ´Ñƒ Ð´Ð°ÑŽÑ‚ÑÑ Ð¾Ñ‡ÐºÐ¸, ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ðµ Ð¾Ñ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÑŽÑ‚ÑÑ Ð² Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐµ Ð¸Ð³Ñ€Ñ‹
-; 5. Ð¡Ñ‚Ð°Ð½Ð´Ð°Ñ€Ñ‚Ð½Ð¾Ðµ Ð¿Ð¾Ð»Ðµ - Ð¿Ñ€ÑÐ¼Ð¾ÑƒÐ³Ð¾Ð»ÑŒÐ½Ð¸Ðº Ñ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ð°Ð¼Ð¸
-;ÐŸÐ»ÑŽÑˆÐºÐ¸: Ð´Ð¾Ð»Ð¶Ð½Ð° Ð±Ñ‹Ñ‚ÑŒ ÑÐµÑ€ÑŒÐµÐ·Ð½Ð°Ñ Ð´Ð¾Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° Ð°Ð»Ð³Ð¾Ñ€Ð¸Ñ‚Ð¼Ð° / Ð½Ð¾Ð²Ñ‹Ð¹ Ð¼Ð¾Ð´ÑƒÐ»ÑŒ, Ð¿Ñ€Ð¾Ñ‰Ðµ Ð³Ð¾Ð²Ð¾Ñ€Ñ - Ñ‡Ñ‚Ð¾-Ñ‚Ð¾, Ñ‚Ñ€ÐµÐ±ÑƒÑŽÑ‰ÐµÐµ Ð¿Ñ€Ð¸Ð»Ð¸Ñ‡Ð½Ð¾Ðµ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ ÑƒÑÐ¸Ð»Ð¸Ð¹ Ð´Ð»Ñ Ñ€ÐµÐ°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ð¸ / Ð´Ð¾Ð±Ð°Ð²Ð»ÑÑŽÑ‰ÐµÐµ ÐºÐ»Ð°ÑÑÐ½Ñ‹Ð¹ Ð½Ð¾Ð²Ñ‹Ð¹ Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¾Ð½Ð°Ð»
-;ÐžÑ†ÐµÐ½ÐºÐ° - Ð±ÑƒÐ´Ñƒ Ð¾Ñ†ÐµÐ½Ð¸Ð²Ð°Ñ‚ÑŒ ÐºÐ°Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹, Ð·Ð½Ð°Ð½Ð¸Ðµ ÐºÐ¾Ð´Ð°, Ð¾Ð¿Ñ‚Ð¸Ð¼Ð¸Ð·Ð°Ñ†Ð¸ÑŽ (Ð¼Ð¾Ð³Ñƒ Ð·Ð°Ð²ÐµÑ€Ð½ÑƒÑ‚ÑŒ Ñ ÑÐ¸Ð»ÑŒÐ½Ð¾ Ð½ÐµÐ¾Ð¿Ñ‚Ð¸Ð¼Ð¸Ð·Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¼/Ð¿Ð»Ð¾Ñ…Ð¸Ð¼ ÐºÐ¾Ð´Ð¾Ð¼), Ð³Ñ€Ð°Ð¼Ð¾Ñ‚Ð½Ð¾Ðµ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¿Ñ€ÐµÑ€Ñ‹Ð²Ð°Ð½Ð¸Ð¹. Ð¡Ñ‡Ð¸Ñ‚Ð°Ñ‚ÑŒ Ð»Ð¸ Ð¿Ð»ÑŽÑˆÐºÑƒ Ð¿Ð»ÑŽÑˆÐºÐ¾Ð¹ - Ñ‚Ð¾Ð¶Ðµ Ñ‚Ð¾Ñ‚ ÐµÑ‰Ñ‘ Ð²Ð¾Ð¿Ñ€Ð¾Ñ :)
-;Ð•ÑÐ»Ð¸ ÐµÑÑ‚ÑŒ Ð²Ð¾Ð¿Ñ€Ð¾ÑÑ‹, Ð·Ð°Ð´Ð°Ð²Ð°Ð¹Ñ‚Ðµ, Ð¾Ð±ÑÑƒÐ´Ð¸Ð¼ Ð²ÑÑ‘ Ð½ÐµÐ¼Ð½Ð¾Ð¶ÐºÐ¾ Ð´Ð¾ Ñ‚Ð¾Ð³Ð¾, ÐºÐ°Ðº Ð²Ñ‹ ÑƒÐ·Ð½Ð°ÐµÑ‚Ðµ, Ñ‡Ñ‚Ð¾ Ð¿Ð¾Ñ‚ÐµÑ€ÑÐ»Ð¸ Ð±Ð°Ð»Ð»Ñ‹ Ð½Ð° Ð¿ÑƒÑÑ‚Ð¾Ð¼ Ð¼ÐµÑÑ‚Ðµ.
+; ¨ª¨â  ‘¥«¥§­¥¢, ”ˆˆ’-301, 2015
+; ‡¬¥©ª 
+; 1. ƒà ä¨ç¥áª¨© à¥¦¨¬ 10h, ¢®ááâ ­ ¢«¨¢ âì à¥¦¨¬ ¯à¨ ¢ëå®¤¥
+; 2. ‚á¥ ®¡à ¡®âç¨ª¨ ¯à¥àë¢ ­¨© ¬¨­¨¬ «ì­ë (â®«ìª® ­¥®¡å®¤¨¬ë© ª®¤)
+; 3. “¯à ¢«¥­¨¥ áâà¥«ª ¬¨, ¯à®¡¥«=¯ ã§ , esc=¢ëå®¤. Žáâ «ì­®¥ ¯® ¦¥« ­¨î
+; 4. ‡¬¥©ª  ¯®«§ ¥â, ¥áâ ¥¤ã, à áâñâ, ã¬¨à ¥â ¯à¨ ¢âëª ­¨¨ ¢ áâ¥­ªã ¨«¨ ¢ á¥¡ï. ‡  ¥¤ã ¤ îâáï ®çª¨, ª®â®àë¥ ®â®¡à ¦ îâáï ¢ ¯à®æ¥áá¥ ¨£àë
+; 5. ‘â ­¤ àâ­®¥ ¯®«¥ - ¯àï¬®ã£®«ì­¨ª á £à ­¨æ ¬¨
+;«îèª¨: ¤®«¦­  ¡ëâì á¥àì¥§­ ï ¤®à ¡®âª   «£®à¨â¬  / ­®¢ë© ¬®¤ã«ì, ¯à®é¥ £®¢®àï - çâ®-â®, âà¥¡ãîé¥¥ ¯à¨«¨ç­®¥ ª®«¨ç¥áâ¢® ãá¨«¨© ¤«ï à¥ «¨§ æ¨¨ / ¤®¡ ¢«ïîé¥¥ ª« áá­ë© ­®¢ë© äã­ªæ¨®­ «
+;Žæ¥­ª  - ¡ã¤ã ®æ¥­¨¢ âì ª ç¥áâ¢® ¢ë¯®«­¥­¨ï à ¡®âë, §­ ­¨¥ ª®¤ , ®¯â¨¬¨§ æ¨î (¬®£ã § ¢¥à­ãâì á á¨«ì­® ­¥®¯â¨¬¨§¨à®¢ ­­ë¬/¯«®å¨¬ ª®¤®¬), £à ¬®â­®¥ ¨á¯®«ì§®¢ ­¨¥ ¯à¥àë¢ ­¨©. ‘ç¨â âì «¨ ¯«îèªã ¯«îèª®© - â®¦¥ â®â ¥éñ ¢®¯à®á :)
+;…á«¨ ¥áâì ¢®¯à®áë, § ¤ ¢ ©â¥, ®¡áã¤¨¬ ¢áñ ­¥¬­®¦ª® ¤® â®£®, ª ª ¢ë ã§­ ¥â¥, çâ® ¯®â¥àï«¨ ¡ ««ë ­  ¯ãáâ®¬ ¬¥áâ¥.
 ;
 .186
 .model tiny
 .code
 ORG 100h
 
-@entry:             jmp   @start
+@entry:     jmp   @start
 
 include SexyPrnt.inc
 include Sound.inc
 
 ;catch_09h:
     ;pusha
-    ;    in      al, 60h             ; ÑÐºÐ°Ð½-ÐºÐ¾Ð´ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½ÐµÐ¹ Ð½Ð°Ð¶Ð°Ñ‚Ð¾Ð¹ (Ð¸Ð· 60 Ð¿Ð¾Ñ€Ñ‚Ð°)
+    ;    in      al, 60h             ; áª ­-ª®¤ ¯®á«¥¤­¥© ­ ¦ â®© (¨§ 60 ¯®àâ )
     ;
     ;    mov     di,     tail
     ;    mov     buffer[di], al
@@ -40,12 +40,12 @@ include Sound.inc
     ;    and     al,     07Fh
     ;    out     61h,    al
     ;    mov     al,     20h
-    ;    out     20h,    al          ; Ð°Ð¿Ð¿Ð°Ñ€Ð°Ñ‚Ð½Ð¾Ð¼Ñƒ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð»ÐµÑ€Ñƒ Ð½ÑƒÐ¶ÐµÐ½ ÑÐ¸Ð³Ð½Ð°Ð» ....
+    ;    out     20h,    al          ;  ¯¯ à â­®¬ã ª®­âà®««¥àã ­ã¦¥­ á¨£­ « ....
     ;popa
     ;iret
 
-randgen proc
-    ; ax = ÐšÐ¾Ð½ÐµÑ† Ð´Ð¸Ð°Ð¿Ð°Ð·Ð¾Ð½Ð° [0...ax]
+randgen             proc
+    ; ax = Š®­¥æ ¤¨ ¯ §®­  [0...ax]
         or      ax, ax      ; range value != 0
         jz      RND_end
         push bx
@@ -87,10 +87,10 @@ randgen proc
         pop bx
     RND_end:
         ret
-randgen endp
+randgen             endp
 
-print_int_3chars proc
-    ; Ð’Ñ…Ð¾Ð´: ax - Ñ‡Ð¸ÑÐ»Ð¾
+print_int_3chars    proc
+    ; ‚å®¤: ax - ç¨á«®
     pusha
     PiVM_next:
         mov     bx, 10
@@ -110,9 +110,9 @@ print_int_3chars proc
         loop    int9_print_digit
     popa
     ret
-print_int_3chars endp
+print_int_3chars    endp
 
-;delay   proc
+;delay              proc
     ;
     ;pusha
     ;    mov     ah, 0
@@ -125,44 +125,44 @@ print_int_3chars endp
     ;    jl      delay_loop
     ;popa
     ;ret
-;delay   endp
+;delay              endp
 
 
-add_food proc
-    ; Ð’Ñ…Ð¾Ð´: al - Ñ†Ð²ÐµÑ‚
+add_food            proc
+    ; ‚å®¤: al - æ¢¥â
     push cx
     push dx
     push ax
-        mov     ax, 78         ; ÐŸÑÐµÐ²Ð´Ð¾-Ñ€Ð°Ð½Ð´Ð¾Ð¼Ð½Ð¾Ðµ Ñ‡Ð¸ÑÐ»Ð¾
-        call    randgen         ; Ð¾Ñ‚ 0 Ð´Ð¾ 78
-        mov     cx, ax          ; Ð—Ð°Ð¿Ð¸ÑÑŒ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ x
+        mov     ax, 78         ; á¥¢¤®-à ­¤®¬­®¥ ç¨á«®
+        call    randgen         ; ®â 0 ¤® 78
+        mov     cx, ax          ; ‡ ¯¨áì ª®®à¤¨­ âë x
  
         mov     ax, 38          ; 
-        call    randgen         ; Ð¾Ñ‚ 0 Ð´Ð¾ 38
-        mov     dx, ax          ; Ð—Ð°Ð¿Ð¸ÑÑŒ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ y
+        call    randgen         ; ®â 0 ¤® 38
+        mov     dx, ax          ; ‡ ¯¨áì ª®®à¤¨­ âë y
 
-        ;ÐŸÑ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼ Ð¿ÑƒÑÑ‚Ð¾Ðµ Ð»Ð¸ Ð¼ÐµÑÑ‚Ð¾
+        ;à®¢¥àï¥¬ ¯ãáâ®¥ «¨ ¬¥áâ®
         mov     ah, 0Dh         ; Read Pixel
         xor     bh, bh          ; Page 0
         push cx
         push dx
-        shl     cx, 3       ; cx*8 (ÑˆÐ¸Ñ€Ð¸Ð½Ð° ÑÑ‡ÐµÐ¹ÐºÐ¸)
-        shl     dx, 3       ; Ð°Ð½Ð°Ð»Ð¾Ð³Ð¸Ñ‡Ð½Ð¾
-        add     dx, 15      ; Ð¾Ñ‚ÑÑ‚ÑƒÐ¿ Ð´Ð»Ñ Ñ‚ÐµÐºÑÑ‚Ð° Ð¸ Ð¿Ñ€Ð¾Ñ‡ÐµÐ³Ð¾
+        shl     cx, 3       ; cx*8 (è¨à¨­  ïç¥©ª¨)
+        shl     dx, 3       ;  ­ «®£¨ç­®
+        add     dx, 15      ; ®âáâã¯ ¤«ï â¥ªáâ  ¨ ¯à®ç¥£®
         add     cx, 8
         add     dx, 8
-        int     10h         ; ÐŸÑ€ÐµÐ¾Ð±Ñ€Ð°Ð·Ð¾Ð²Ñ‹Ð²Ð°ÐµÐ¼ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ Ð² ÑÐºÑ€Ð°Ð½Ð½Ñ‹Ðµ Ð¸ ÑÐ¿Ñ€Ð°ÑˆÐ¸Ð²Ð°ÐµÐ¼ Ñ†Ð²ÐµÑ‚ Ð¿Ð¸ÐºÑÐµÐ»Ñ
+        int     10h         ; à¥®¡à §®¢ë¢ ¥¬ ª®®à¤¨­ âë ¢ íªà ­­ë¥ ¨ á¯à è¨¢ ¥¬ æ¢¥â ¯¨ªá¥«ï
         pop dx
         pop cx
 
-        cmp     al, color_poo     ; ÐšÐ°ÐºÐ°
+        cmp     al, color_poo     ; Š ª 
         je      AF_collision
-        cmp     al, color_food     ; Ð¯Ð±Ð»Ð¾Ñ‡ÐºÐ¾
+        cmp     al, color_food     ; Ÿ¡«®çª®
         je      AF_collision
-        cmp     al, color_snake     ; Ð¡Ð°Ð¼Ð° Ð·Ð¼ÐµÑ
+        cmp     al, color_snake     ; ‘ ¬  §¬¥ï
         je      AF_collision
-        cmp     al, color_border     ; Ð¡Ñ‚ÐµÐ½ÐºÐ°
-        je      AF_collision      ;Ð•ÑÐ»Ð¸ Ð·Ð°Ð½ÑÑ‚Ð¾, Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€ÑÐµÐ¼
+        cmp     al, color_border     ; ‘â¥­ª 
+        je      AF_collision      ;…á«¨ § ­ïâ®, ¯®¢â®àï¥¬
 
     pop ax
         call    draw_snake_pixel
@@ -176,60 +176,61 @@ add_food proc
     pop dx
     pop cx
     ret
-add_food endp
+add_food            endp
 
 
 check_head_position proc
-    ; ÐŸÑ€Ð¾Ð²ÐµÑ€Ð¸Ñ‚ÑŒ, Ñ‡Ñ‚Ð¾ Ð½Ð°Ñ…Ð¾Ð´Ð¸Ñ‚ÑÑ Ð½Ð° Ð¶ÐµÐ»Ð°ÐµÐ¼Ð¾Ð¹ Ð´Ð»Ñ Ð³Ð¾Ð»Ð¾Ð²Ñ‹ Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ð¸,
-    ; Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ
-    ; Ð’Ñ…Ð¾Ð´:     cx - x (Ð² Ð½Ð°ÑˆÐµÐ¹ ÑÐµÑ‚ÐºÐµ (80-2)x(40-2))
+    ; à®¢¥à¨âì, çâ® ­ å®¤¨âáï ­  ¦¥« ¥¬®© ¤«ï £®«®¢ë ¯®§¨æ¨¨,
+    ; ®¡à ¡®â âì
+    ; ‚å®¤:     cx - x (¢ ­ è¥© á¥âª¥ (80-2)x(40-2))
     ;           dx - y
-    ; Ð ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚:
-    ;           CF=1, ÐµÑÐ»Ð¸ Ð½Ðµ Ð½ÑƒÐ¶Ð½Ð¾ ÑÑ‚Ð¸Ñ€Ð°Ñ‚ÑŒ Ñ…Ð²Ð¾ÑÑ‚ (Ð¼Ñ‹ ÑÑŠÐµÐ»Ð¸ ÑÐ±Ð»Ð¾ÐºÐ¾)
+    ; ¥§ã«ìâ â:
+    ;           CF=1, ¥á«¨ ­¥ ­ã¦­® áâ¨à âì å¢®áâ (¬ë áê¥«¨ ï¡«®ª®)
 
-    ; ÐŸÑ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ Ð¿Ð¾Ð»Ñ
+    ; à®¢¥àï¥¬ £à ­¨æë ¯®«ï
         cmp     cx, 78
-        jge     GO_exit
+        jge     CHP_exit
         cmp     dx, 38
-        jge     GO_exit
-    ; ÐŸÑ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼ ÑÐ¸Ð¼Ð²Ð¾Ð»Ñ‹
+        jge     CHP_exit
+    ; à®¢¥àï¥¬ á¨¬¢®«ë
         mov     ah, 0Dh         ; Read Pixel
         xor     bh, bh
         push cx
         push dx
         inc     cx
         inc     dx
-        shl     cx, 3           ; cx*8 (ÑˆÐ¸Ñ€Ð¸Ð½Ð° ÑÑ‡ÐµÐ¹ÐºÐ¸)
-        shl     dx, 3           ; Ð°Ð½Ð°Ð»Ð¾Ð³Ð¸Ñ‡Ð½Ð¾
-        add     dx, 15          ; Ð¾Ñ‚ÑÑ‚ÑƒÐ¿ Ð´Ð»Ñ Ñ‚ÐµÐºÑÑ‚Ð° Ð¸ Ð¿Ñ€Ð¾Ñ‡ÐµÐ³Ð¾
-        ;add     cx, 8 ÐºÐ¾Ð¼Ð¼ÐµÐ½Ñ‚
-        ;add     dx, 8 Ð² Ð¿Ð¾Ð»ÑŒÐ·Ñƒ inc Ð¿ÐµÑ€ÐµÐ´ ÑƒÐ¼Ð½Ð¾Ð¶ÐµÐ½Ð¸ÐµÐ¼ Ð½Ð° 8 (Ð²Ñ‹ÑˆÐµ)
+        shl     cx, 3           ; cx*8 (è¨à¨­  ïç¥©ª¨)
+        shl     dx, 3           ;  ­ «®£¨ç­®
+        add     dx, 15          ; ®âáâã¯ ¤«ï â¥ªáâ  ¨ ¯à®ç¥£®
+        ;add     cx, 8 ª®¬¬¥­â
+        ;add     dx, 8 ¢ ¯®«ì§ã inc ¯¥à¥¤ ã¬­®¦¥­¨¥¬ ­  8 (¢ëè¥)
         int     10h
         pop dx
         pop cx
         
-        cmp     al, color_food       ; Ð¯Ð±Ð»Ð¾ÐºÐ¾
-        je      GO_food
+        cmp     al, color_food       ; Ÿ¡«®ª®
+        je      CHP_food
         cmp     al, color_speed_up       ; Speed-up
-        je      GO_increase_speed
+        je      CHP_increase_speed
         cmp     al, color_speed_down     ; Speed-down
-        je      GO_decrease_speed
-        cmp     al, color_border         ; Ð¡Ñ‚ÐµÐ½ÐºÐ°
-        je      GO_exit
-        cmp     al, color_poo            ; ÐšÐ°ÐºÐ°ÑˆÐºÐ¸
-        je      GO_exit
-        cmp     al, color_snake          ; Ð—Ð¼ÐµÐ¹ÐºÐ°
-        je      GO_exit
-        jmp     GO_good
-    GO_exit:
-        call    terminate_program
-    
-    GO_food:
+        je      CHP_decrease_speed
+        cmp     al, color_border         ; ‘â¥­ª 
+        je      CHP_exit
+        cmp     al, color_poo            ; Š ª èª¨
+        je      CHP_exit
+        cmp     al, color_snake          ; ‡¬¥©ª 
+        je      CHP_exit
+        jmp     CHP_good
+    CHP_exit:
+        mov     game_over, 1
+        jmp     CHP_good
+
+    CHP_food:
         push    cx
         push    dx
-        inc     score               ; Ð£Ð²ÐµÐ»Ð¸Ñ‡Ð¸Ð¼ ÑÑ‡Ñ‘Ñ‚
+        inc     score               ; “¢¥«¨ç¨¬ áçñâ
 
-        ; ÐšÐ°ÐºÐ°ÑˆÐºÐ¸
+        ; Š ª èª¨
         inc     food_eaten
         cmp     food_eaten, 5
         jl      WC_not_now
@@ -241,8 +242,8 @@ check_head_position proc
         call    draw_snake_pixel
      WC_not_now:
      print_score:
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        xor     bh, bh          ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ 0,0
+        mov     ah, 02h         ; Šãàá®à
+        xor     bh, bh          ; ¢ ¯®§¨æ¨î 0,0
         xor     dx, dx
         mov     dl, str_score_len
         int     10h
@@ -257,23 +258,23 @@ check_head_position proc
         stc
         ret
 
-    GO_increase_speed:
+    CHP_increase_speed:
         xor     ah, ah                    ; 0->1, 1->2, ..., 7->7
         mov     al, speed_freq_x1000
         push dx
         inc speed_multiplier
-        mul     speed_multiplier          ; ÐŸÑ€Ð¾Ð²ÐµÑ€Ð¸Ð¼, Ñ‡Ñ‚Ð¾ Ð¶ÐµÐ»Ð°ÐµÐ¼Ñ‹Ð¹ Ð´ÐµÐ»Ð¸Ñ‚ÐµÐ»ÑŒ
+        mul     speed_multiplier          ; à®¢¥à¨¬, çâ® ¦¥« ¥¬ë© ¤¥«¨â¥«ì
         dec speed_multiplier            
         pop dx
 
-        cmp     ax, 0Fh                   ; Ñ‡Ð°ÑÑ‚Ð¾Ñ‚Ñ‹ Ð½Ðµ Ð¿Ñ€ÐµÐ²Ð·Ð¾Ð¹Ð´Ñ‘Ñ‚ FFFFh
-        jg      GO_good                   ; pass_increasing
+        cmp     ax, 0Fh                   ; ç áâ®âë ­¥ ¯à¥¢§®©¤ñâ FFFFh
+        jg      CHP_good                   ; pass_increasing
 
         inc     speed_multiplier
         inc     speed_multiplier
-    GO_decrease_speed:
+    CHP_decrease_speed:
         cmp     speed_multiplier, 0      ; 7->6, 6->5, 0->0
-        je      GO_good                  ; pass_decreasing
+        je      CHP_good                  ; pass_decreasing
         dec     speed_multiplier
         pusha
 
@@ -286,13 +287,13 @@ check_head_position proc
         call    reprogram_pit
         
         popa
-        ;jmp     GO_good
-    GO_good:
+        ;jmp     CHP_good
+    CHP_good:
         clc
         ret
 check_head_position endp
 
-terminate_program proc
+terminate_program   proc
 
     call    stop_play_note  
     mov     bx, 0FFFFh
@@ -300,14 +301,14 @@ terminate_program proc
         mov     ah, 00h
         mov     al, 10h
         int     10h
-        ; Ð’Ð¾ÑÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÐ¼ Ð²Ð¸Ð´ÐµÐ¾-Ñ€ÐµÐ¶Ð¸Ð¼
+        ; ‚®ááâ ­ ¢«¨¢ ¥¬ ¢¨¤¥®-à¥¦¨¬
         mov     ah, 00h
         mov     al, original_videomode
         int     10h
         mov     ah, 05h
         mov     al, original_videopage
         int     10h
-        ; Ð’Ð¾ÑÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÐ¼ Ð²ÐµÐºÑ‚Ð¾Ñ€ 09h
+        ; ‚®ááâ ­ ¢«¨¢ ¥¬ ¢¥ªâ®à 09h
         ;mov     ax, 2509h
         ;mov     dx, word ptr cs:[old_09h]
         ;mov     ds, word ptr cs:[old_09h+2]
@@ -317,22 +318,22 @@ terminate_program proc
         mov     ax, 4c00h
         int     21h
         ret
-terminate_program endp
+terminate_program   endp
 
-draw_border proc
+draw_border         proc
     mov     ah, 0Ch         ; Function Draw Pixel
     mov     al, color_border         
     xor     bh, bh          ; Page 0
     mov     dx, 15          ; y coord
 
-    mov     cx, 640*8 + 7   ; x coord = [8 ÑÑ‚Ñ€Ð¾Ðº](640*8) - 1 + [Ð”Ð»Ñ Ð»ÐµÐ²Ð¾Ð¹ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñ‹](8)
+    mov     cx, 640*8 + 7   ; x coord = [8 áâà®ª](640*8) - 1 + [„«ï «¥¢®© £à ­¨æë](8)
     DB_topEZ:
         int     10h
         loop DB_topEZ
-    int     10h             ; Ð¡Ð°Ð¼Ñ‹Ð¹ Ð¿ÐµÑ€Ð²Ñ‹Ð¹ Ð¿Ð¸ÐºÑÐµÐ»ÑŒ (ÐŸÐ¾Ñ‚Ð¾Ð¼Ñƒ Ñ‡Ñ‚Ð¾ cx=0 break)
+    int     10h             ; ‘ ¬ë© ¯¥à¢ë© ¯¨ªá¥«ì (®â®¬ã çâ® cx=0 break)
 
     mov     dx, 350 - 15 - 8; y coord
-    mov     cx, 640*8 - 1   ; x coord = [8 ÑÑ‚Ñ€Ð¾Ðº](640*8) - 1
+    mov     cx, 640*8 - 1   ; x coord = [8 áâà®ª](640*8) - 1
     DB_bottomEZ:
         int     10h
         loop    DB_bottomEZ
@@ -352,82 +353,17 @@ draw_border proc
         jl      DB_left_right_yEZ
 
     ret
-draw_border endp
-
-draw_border_generic proc
-    mov     ah, 0Ch         ; Function Draw Pixel
-    mov     al, color_border         
-    xor     bh, bh          ; Page 0
-
-    ; x coord
-    push    ax
-        mov     ax, 640     ; Ð¨Ð¸Ñ€Ð¸Ð½Ð° ÑÐºÑ€Ð°Ð½Ð°
-        mul     thickness   ; * Ñ‚Ð¾Ð»Ñ‰Ð¸Ð½Ñƒ Ð»Ð¸Ð½Ð¸Ð¸ 
-        add     ax, thickness; [Ð”Ð»Ñ Ð»ÐµÐ²Ð¾Ð¹ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñ‹](Ñ‚Ð¾Ð»Ñ‰Ð¸Ð½Ð°)
-        dec     ax          ; -1
-        xchg    cx, ax
-    pop     ax
-    ; y coord
-    mov     dx, 15          ; ÐŸÑ€Ð¸Ð¿ÑƒÑÐº Ð´Ð»Ñ ÑÑ‡Ñ‘Ñ‚Ð° Ð¸ Ð¿Ñ€Ð¾Ñ‡ÐµÐ³Ð¾
-
-    DB_top:
-        int     10h
-        loop DB_top
-    int     10h             ; Ð¡Ð°Ð¼Ñ‹Ð¹ Ð¿ÐµÑ€Ð²Ñ‹Ð¹ Ð¿Ð¸ÐºÑÐµÐ»ÑŒ (ÐŸÐ¾Ñ‚Ð¾Ð¼Ñƒ Ñ‡Ñ‚Ð¾ cx=0 break)
-
-
-    ; x coord
-    push    ax
-        mov     ax, 640     ; Ð¨Ð¸Ñ€Ð¸Ð½Ð° ÑÐºÑ€Ð°Ð½Ð°
-        mul     thickness   ; * Ñ‚Ð¾Ð»Ñ‰Ð¸Ð½Ñƒ Ð»Ð¸Ð½Ð¸Ð¸ 
-        dec     ax          ; - 1
-        xchg    cx, ax
-    pop     ax
-    ; y coord
-    mov     dx, 350 - 15
-    sub     dx, thickness
-
-    DB_bottom:
-        int     10h
-        loop    DB_bottom
-    int     10h
-
-
-    mov     dx, 15
-    add     dx, thickness
-
-    DB_left_right_y:
-        mov     cx, 640
-        sub     cx, thickness
-        DB_left_right_x:
-            int     10h
-            inc     cx
-            push    ax
-            mov     ax, 640
-            add     ax, thickness
-            cmp     cx, ax  ; 640 + thickness
-            pop     ax
-            jl      DB_left_right_x
-        inc     dx
-        push    ax
-        mov     ax, 350 - 15
-        sub     ax, thickness
-        cmp     dx, ax
-        pop     ax
-        jl      DB_left_right_y
-
-    ret
-draw_border_generic endp
+draw_border         endp
 
 
 draw_snake_pixel    proc
-    ; Ð’Ñ…Ð¾Ð´: cx - x ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ð°
-    ;       dx - y ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ð°
-    ;       al - Ñ†Ð²ÐµÑ‚
+    ; ‚å®¤: cx - x ª®®à¤¨­ â 
+    ;       dx - y ª®®à¤¨­ â 
+    ;       al - æ¢¥â
     pusha
-        shl     cx, 3       ; cx*8 (ÑˆÐ¸Ñ€Ð¸Ð½Ð° ÑÑ‡ÐµÐ¹ÐºÐ¸)
-        shl     dx, 3       ; Ð°Ð½Ð°Ð»Ð¾Ð³Ð¸Ñ‡Ð½Ð¾
-        add     dx, 15      ; Ð¾Ñ‚ÑÑ‚ÑƒÐ¿ Ð´Ð»Ñ Ñ‚ÐµÐºÑÑ‚Ð° Ð¸ Ð¿Ñ€Ð¾Ñ‡ÐµÐ³Ð¾
+        shl     cx, 3       ; cx*8 (è¨à¨­  ïç¥©ª¨)
+        shl     dx, 3       ;  ­ «®£¨ç­®
+        add     dx, 15      ; ®âáâã¯ ¤«ï â¥ªáâ  ¨ ¯à®ç¥£®
 
         add     cx, 8
         add     dx, 8
@@ -435,10 +371,10 @@ draw_snake_pixel    proc
         mov     ah, 0Ch
         xor     bh, bh
 
-        mov     si, 7       ; Ð¦Ð¸ÐºÐ» Ð¿Ð¾ x
+        mov     si, 7       ; –¨ª« ¯® x
         DSP_x:
             add     cx, si
-            mov     di, 7       ; Ð¦Ð¸ÐºÐ» Ð¿Ð¾ y
+            mov     di, 7       ; –¨ª« ¯® y
             DSP_y:
                 add     dx, di
                 int 10h
@@ -454,7 +390,7 @@ draw_snake_pixel    proc
     ret
 draw_snake_pixel    endp
 
-init_snake  proc
+init_snake          proc
     mov     al, color_snake
     mov     cx, 2
     mov     dx, 0
@@ -462,9 +398,9 @@ init_snake  proc
         call    draw_snake_pixel
         loop    IS
     ret
-init_snake  endp
+init_snake          endp
 
-init_snake2  proc
+init_snake2         proc
     mov     al, color_snake
     mov     si, score
     IS2:
@@ -478,7 +414,7 @@ init_snake2  proc
         test    si, si
         jns     IS2
     ret
-init_snake2  endp
+init_snake2         endp
 
 
 @start:
@@ -487,22 +423,22 @@ init_snake2  endp
     mov     bx, 0FFFFh
     call    reprogram_pit
 
-    mov     ah, 00h             ; Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ð¼ Ñ‚ÐµÐºÑƒÑ‰ÐµÐµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ
-    xor     dh, dh              ; ÑÐ¸ÑÑ‚ÐµÐ¼Ð½Ð¾Ð³Ð¾ Ñ‚Ð°Ð¹Ð¼ÐµÑ€Ð° ÐºÐ°Ðº Ð½Ð°Ñ‡Ð°Ð»ÑŒÐ½Ñ‹Ð¹
-    int     1Ah                 ; seed Ð´Ð»Ñ Ð¿ÑÐµÐ²Ð´Ð¾-Ñ€Ð°Ð½Ð´Ð¾Ð¼Ð°                
+    mov     ah, 00h             ; “áâ ­®¢¨¬ â¥ªãé¥¥ §­ ç¥­¨¥
+    xor     dh, dh              ; á¨áâ¥¬­®£® â ©¬¥à  ª ª ­ ç «ì­ë©
+    int     1Ah                 ; seed ¤«ï ¯á¥¢¤®-à ­¤®¬                 
     mov     RND_seed1, dx
     xor     dh, dh
     int     1Ah
     mov     RND_seed2, dx
 
-    mov     ah, 0Fh             ; Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ð¼ Ð½Ð°Ñ‡Ð°Ð»ÑŒÐ½Ñ‹Ðµ Ð²Ð¸Ð´ÐµÐ¾-Ñ€ÐµÐ¶Ð¸Ð¼
-    int     10h                 ; Ð¸ Ð¾Ñ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÐµÐ¼ÑƒÑŽ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñƒ
+    mov     ah, 0Fh             ; ‘®åà ­¨¬ ­ ç «ì­ë¥ ¢¨¤¥®-à¥¦¨¬
+    int     10h                 ; ¨ ®â®¡à ¦ ¥¬ãî áâà ­¨æã
     mov     original_videomode, al
     mov     original_videopage, bh
 
-    mov     ax, 0010h           ; ÐŸÐµÑ€ÐµÑ…Ð¾Ð´Ð¸Ð¼ Ð² Ð³Ñ€Ð°Ñ„Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ñ€ÐµÐ¶Ð¸Ð¼
-    int     10h                 ; Ð½Ð¾Ð¼ÐµÑ€ 10h
-    ; Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ð¼ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚Ñ‡Ð¸Ðº INT 09h Ð¸ ÑÐ¾Ñ…Ñ€Ð°Ð½Ð¸Ð¼ ÑÑ‚Ð°Ñ€Ñ‹Ð¹
+    mov     ax, 0010h           ; ¥à¥å®¤¨¬ ¢ £à ä¨ç¥áª¨© à¥¦¨¬
+    int     10h                 ; ­®¬¥à 10h
+    ; “áâ ­®¢¨¬ ®¡à ¡®âç¨ª INT 09h ¨ á®åà ­¨¬ áâ àë©
     ;mov     ax, 3509h
     ;int     21h
     ;mov     [old_09h],  bx
@@ -512,122 +448,167 @@ init_snake2  endp
     ;cli
     ;    int     21h
     ;sti
-    call    menu
-    call    ax;classic
+    start_loop:
+        call    menu
+        call    ax
+        jmp     start_loop
+    ret
 
-
-menu    proc
+menu                proc
 
     menu_draw:
-        mov     bh, 1           ; ÐÐ¾Ð¼ÐµÑ€ Ð¾Ñ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÐµÐ¼Ð¾Ð¹ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ (Ð´Ð°Ð»ÐµÐµ Ð²ÑÑŽÐ´Ñƒ)
-        mov     ah, 05h         ; Ð¡Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð½Ð° ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñƒ #1
+
+        mov     bh, 1           ; ®¬¥à ®â®¡à ¦ ¥¬®© áâà ­¨æë (¤ «¥¥ ¢áî¤ã)
+        mov     ah, 05h         ; ‘¬¥­¨âì ­  áâà ­¨æã #1
         mov     al, bh
         int     10h
-        
-        ; ÐšÐ»Ð°ÑÑÐ¸ÐºÐ° (Ð²Ð²ÐµÑ€Ñ…)
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;mov    bh, 1           ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ dl,dh
-        mov     dl, str_classic_len ; Ð’Ñ‹Ñ‡Ñ‚ÐµÐ¼
-        shr     dl, 1           ; Ð¿Ð¾Ð»Ð¾Ð²Ð¸Ð½Ñƒ Ð´Ð»Ð¸Ð½Ñ‹ ÑÑ‚Ñ€Ð¾ÐºÐ¸
-        neg     dl              ; Ð¸Ð·
-        add     dl, 40          ; ÑÐµÑ€ÐµÐ´Ð¸Ð½Ñ‹ ÑÐºÑ€Ð°Ð½Ð°
+
+        ; Žç¨áâª  íªà ­ 
+        mov     ah, 02h
+        mov     bx, 0100h
+        mov     dx, 0000h
+        int     10h
+        mov     ah, 09h
+        mov     al, ' '
+        mov     cx, 80*25
+        int     10h
+
+        ; Š« áá¨ª  (¢¢¥àå)
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1           ; ¢ ¯®§¨æ¨î dl,dh
+        mov     dl, str_classic_len ; ‚ëçâ¥¬
+        shr     dl, 1           ; ¯®«®¢¨­ã ¤«¨­ë áâà®ª¨
+        neg     dl              ; ¨§
+        add     dl, 40          ; á¥à¥¤¨­ë íªà ­ 
         mov     dh, 7
         int     10h
-        mov     ah, 09h         ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ° ÐšÐ»Ð°ÑÑÐ¸ÐºÐ°
+        mov     ah, 09h         ; ‘âà®ª  Š« áá¨ª 
         lea     dx, str_classic
         int     21h
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;mov    bh, 1            ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ 11,40
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1            ; ¢ ¯®§¨æ¨î 11,40
         mov     dl, 40-1
         mov     dh, 8
         int     10h
         mov     ah, 02h
-        mov     dl, 24          ; Ð¡Ñ‚Ñ€ÐµÐ»ÐºÐ° Ð²Ð²ÐµÑ€Ñ…
+        mov     dl, 24          ; ‘âà¥«ª  ¢¢¥àå
         int     21h
 
-        ; Ð’Ñ‹Ñ…Ð¾Ð´ (Ð²Ð½Ð¸Ð·)
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;mov    bh, 1            ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ dl,dh
-        mov     dl, str_exit_len ; Ð’Ñ‹Ñ‡Ñ‚ÐµÐ¼
-        shr     dl, 1           ; Ð¿Ð¾Ð»Ð¾Ð²Ð¸Ð½Ñƒ Ð´Ð»Ð¸Ð½Ñ‹ ÑÑ‚Ñ€Ð¾ÐºÐ¸
-        neg     dl              ; Ð¸Ð·
-        add     dl, 40          ; ÑÐµÑ€ÐµÐ´Ð¸Ð½Ñ‹ ÑÐºÑ€Ð°Ð½Ð°
+        ; ‚ëå®¤ (¢­¨§)
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1            ; ¢ ¯®§¨æ¨î dl,dh
+        mov     dl, str_exit_len ; ‚ëçâ¥¬
+        shr     dl, 1           ; ¯®«®¢¨­ã ¤«¨­ë áâà®ª¨
+        neg     dl              ; ¨§
+        add     dl, 40          ; á¥à¥¤¨­ë íªà ­ 
         mov     dh, 11
         int     10h
-        mov     ah, 09h         ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ° Ð’Ñ‹Ñ…Ð¾Ð´
+        mov     ah, 09h         ; ‘âà®ª  ‚ëå®¤
         lea     dx, str_exit
         int     21h
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;mov    bh, 1            ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ 8,40
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1            ; ¢ ¯®§¨æ¨î 8,40
         mov     dl, 40-1
         mov     dh, 10
         int     10h
         mov     ah, 02h
-        mov     dl, 25          ; Ð¡Ñ‚Ñ€ÐµÐ»ÐºÐ° Ð²Ð½Ð¸Ð·
+        mov     dl, 25          ; ‘âà¥«ª  ¢­¨§
         int     21h
 
-        ; (Ð²Ð»ÐµÐ²Ð¾)
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;mov    bh, 1            ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ dl,dh
-        mov     dl, str_modern_len ; Ð’Ñ‹Ñ‡Ñ‚ÐµÐ¼ Ð´Ð»Ð¸Ð½Ñƒ ÑÑ‚Ñ€Ð¾ÐºÐ¸
-        neg     dl              ; Ð¸Ð·
-        add     dl, 40-3        ; ÑÐµÑ€ÐµÐ´Ð¸Ð½Ñ‹ ÑÐºÑ€Ð°Ð½Ð° - 3 ÑÐ¸Ð¼Ð²Ð¾Ð»Ð° Ð´Ð»Ñ ÑÑ‚Ñ€ÐµÐ»ÐºÐ¸
+        ; (¢«¥¢®)
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1            ; ¢ ¯®§¨æ¨î dl,dh
+        mov     dl, str_modern_len ; ‚ëçâ¥¬ ¤«¨­ã áâà®ª¨
+        neg     dl              ; ¨§
+        add     dl, 40-3        ; á¥à¥¤¨­ë íªà ­  - 3 á¨¬¢®«  ¤«ï áâà¥«ª¨
         mov     dh, 9
         int     10h
-        mov     ah, 09h         ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ°
+        mov     ah, 09h         ; ‘âà®ª 
         lea     dx, str_modern
         int     21h
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
+        mov     ah, 02h         ; Šãàá®à
         ;mov    bh, 1            ; 
         mov     dl, 40-3
         mov     dh, 9
         int     10h
         mov     ah, 02h
-        mov     dl, 17          ; Ð¡Ñ‚Ñ€ÐµÐ»ÐºÐ° Ð²Ð»ÐµÐ²Ð¾
+        mov     dl, 17          ; ‘âà¥«ª  ¢«¥¢®
         int     21h
 
-        ; (Ð²Ð¿Ñ€Ð°Ð²Ð¾)
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;mov    bh, 1            ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ dl,dh
-        mov     dl, 40+3        ; ÑÐµÑ€ÐµÐ´Ð¸Ð½Ñ‹ ÑÐºÑ€Ð°Ð½Ð°
+        ; (¢¯à ¢®)
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1            ; ¢ ¯®§¨æ¨î dl,dh
+        mov     dl, 40+3        ; á¥à¥¤¨­ë íªà ­ 
         mov     dh, 9
         int     10h
-        mov     ah, 09h         ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ°
+        mov     ah, 09h         ; ‘âà®ª 
         lea     dx, str_right
         int     21h
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
+        mov     ah, 02h         ; Šãàá®à
         ;mov    bh, 1            ; 
         mov     dl, 40+1
         mov     dh, 9
         int     10h
         mov     ah, 02h
-        mov     dl, 16          ; Ð¡Ñ‚Ñ€ÐµÐ»ÐºÐ° Ð²Ð¿Ñ€Ð°Ð²Ð¾
+        mov     dl, 16          ; ‘âà¥«ª  ¢¯à ¢®
         int     21h
 
-        cmp     game_in_progress, 0
-        je      menu_loop
-        ; Ð’Ð¾ÑÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¸Ð³Ñ€Ñƒ (Esc)
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;mov    bh, 1            ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ dl,dh
-        mov     dl, str_resume1_len ; Ð’Ñ‹Ñ‡Ñ‚ÐµÐ¼
-        shr     dl, 1           ; Ð¿Ð¾Ð»Ð¾Ð²Ð¸Ð½Ñƒ Ð´Ð»Ð¸Ð½Ñ‹ ÑÑ‚Ñ€Ð¾ÐºÐ¸
-        neg     dl              ; Ð¸Ð·
-        add     dl, 40          ; ÑÐµÑ€ÐµÐ´Ð¸Ð½Ñ‹ ÑÐºÑ€Ð°Ð½Ð°
+        cmp     game_over, 0
+        je      draw_pause_msg
+        ; GAME OVER
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1            ; ¢ ¯®§¨æ¨î dl,dh
+        mov     dl, str_gameover1_len ; ‚ëçâ¥¬
+        shr     dl, 1           ; ¯®«®¢¨­ã ¤«¨­ë áâà®ª¨
+        neg     dl              ; ¨§
+        add     dl, 40          ; á¥à¥¤¨­ë íªà ­ 
         mov     dh, 16
         int     10h
-        mov     ah, 09h         ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ° Ð’Ñ‹Ñ…Ð¾Ð´
+        mov     ah, 09h         ; ‘âà®ª 
+        lea     dx, str_gameover1
+        int     21h
+
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1            ; ¢ ¯®§¨æ¨î dl,dh
+        mov     dl, str_gameover2_len ; ‚ëçâ¥¬
+        shr     dl, 1           ; ¯®«®¢¨­ã ¤«¨­ë áâà®ª¨
+        neg     dl              ; ¨§
+        add     dl, 40-2          ; á¥à¥¤¨­ë íªà ­ 
+        mov     dh, 18
+        int     10h
+        mov     ah, 09h         ; ‘âà®ª 
+        lea     dx, str_gameover2
+        int     21h
+        mov     ax, score
+        call    print_int_3chars
+        mov     game_over, 0
+        jmp     menu_loop
+
+     draw_pause_msg:
+        cmp     game_in_progress, 0
+        je      menu_loop
+        ; ‚®ááâ ­®¢¨âì ¨£àã (Esc)
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1            ; ¢ ¯®§¨æ¨î dl,dh
+        mov     dl, str_resume1_len ; ‚ëçâ¥¬
+        shr     dl, 1           ; ¯®«®¢¨­ã ¤«¨­ë áâà®ª¨
+        neg     dl              ; ¨§
+        add     dl, 40          ; á¥à¥¤¨­ë íªà ­ 
+        mov     dh, 16
+        int     10h
+        mov     ah, 09h         ; ‘âà®ª 
         lea     dx, str_resume1
         int     21h
 
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;mov    bh, 1            ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ dl,dh
-        mov     dl, str_resume2_len ; Ð’Ñ‹Ñ‡Ñ‚ÐµÐ¼
-        shr     dl, 1           ; Ð¿Ð¾Ð»Ð¾Ð²Ð¸Ð½Ñƒ Ð´Ð»Ð¸Ð½Ñ‹ ÑÑ‚Ñ€Ð¾ÐºÐ¸
-        neg     dl              ; Ð¸Ð·
-        add     dl, 40          ; ÑÐµÑ€ÐµÐ´Ð¸Ð½Ñ‹ ÑÐºÑ€Ð°Ð½Ð°
+        mov     ah, 02h         ; Šãàá®à
+        ;mov    bh, 1            ; ¢ ¯®§¨æ¨î dl,dh
+        mov     dl, str_resume2_len ; ‚ëçâ¥¬
+        shr     dl, 1           ; ¯®«®¢¨­ã ¤«¨­ë áâà®ª¨
+        neg     dl              ; ¨§
+        add     dl, 40          ; á¥à¥¤¨­ë íªà ­ 
         mov     dh, 18
         int     10h
-        mov     ah, 09h         ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ° Ð’Ñ‹Ñ…Ð¾Ð´
+        mov     ah, 09h         ; ‘âà®ª 
         lea     dx, str_resume2
         int     21h
 
@@ -637,29 +618,28 @@ menu    proc
 
         mov     ax, 0100h
         int     16h
-        jz      menu_loop           ;Ð‘ÐµÐ· Ð½Ð°Ð¶Ð°Ñ‚Ð¸Ñ Ð²Ñ‹Ñ…Ð¾Ð´Ð¸Ð¼
+        jz      menu_loop           ; ¥§ ­ ¦ â¨ï - ¦¤ñ¬ ¥é¥
         xor     ah, ah
         int     16h
 
-        cmp     game_in_progress, 0 ; Ð•ÑÐ»Ð¸ Ð¸Ð³Ñ€Ð°  ÐµÑ‰Ñ‘ Ð½Ðµ Ð½Ð°Ñ‡Ð°Ñ‚Ð°, Ñ‚Ð¾ Ð¼Ñ‹ 
-        je      menu_not_esc        ; Ð´Ð°Ð¶Ðµ Ð½Ðµ Ð¶Ð´ÐµÐ¼ Ð½Ð°Ð¶Ð°Ñ‚Ð¸Ñ Esc Ð´Ð»Ñ ÐµÑ‘ 
-        cmp     ah, 1h              ; Ð²Ð¾ÑÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ñ
+        cmp     game_in_progress, 0 ; …á«¨ ¨£à   ¥éñ ­¥ ­ ç â , â® ¬ë 
+        je      menu_not_esc        ; ¤ ¦¥ ­¥ ¦¤¥¬ ­ ¦ â¨ï Esc ¤«ï ¥ñ ¢®ááâ ­®¢«¥­¨ï
+        cmp     ah, 1h              ; 
         jne     menu_not_esc
-        ; Esc - Ð²Ð¾ÑÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¸Ð³Ñ€Ñƒ
-        mov     ax, 0500h           ; Ð¡Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñƒ Ð½Ð° #0
-        int     10h                 ; Ñ‚.Ðµ. Ð²ÐµÑ€Ð½ÑƒÑ‚ÑŒÑÑ Ðº Ð¸Ð³Ñ€Ð¾Ð²Ð¾Ð¼Ñƒ Ð¿Ð¾Ð»ÑŽ
-        mov     ax, offset classic
+        ; Esc - ¢®ááâ ­®¢¨âì ¨£àã
+        mov     ax, 0500h           ; ‘¬¥­¨âì áâà ­¨æã ­  #0
+        int     10h                 ; â.¥. ¢¥à­ãâìáï ª ¨£à®¢®¬ã ¯®«î
         jmp     menu_end
      menu_not_esc:
         cmp     ah, 50h
         jne     menu_not_d
-        ; Ð’Ð½Ð¸Ð· - Ð²Ñ‹Ñ…Ð¾Ð´
-        mov     ax, offset terminate_program;call    terminate_program
+        ; ‚­¨§ - ¢ëå®¤
+        mov     ax, offset terminate_program
         jmp     menu_end
      menu_not_d:
         cmp     ah, 48h
         jne     menu_not_ud
-        ; Ð’Ð²ÐµÑ€Ñ… - classic
+        ; ‚¢¥àå - ®¢ ï ¨£à  classic
         mov     game_in_progress, 0  ; New classic
         mov     score, 2
         mov     [snake+0], 0100h
@@ -669,7 +649,7 @@ menu    proc
      menu_not_ud:
         cmp     ah, 4Bh
         jne     menu_not_udl
-        ; Ð’Ð»ÐµÐ²Ð¾ - modern
+        ; ‚«¥¢® - modern
         mov     game_in_progress, 0  ; New modern
         mov     score, 2
         mov     [snake+0], 0100h
@@ -679,31 +659,26 @@ menu    proc
      menu_not_udl:
         cmp     ah, 4Dh
         je      menu_r
-        jmp     menu_loop
+        jmp     menu_loop           ; ¥¨§¢¥áâ­ ï ª« ¢¨è  - ¦¤ñ¬ ¥é¥
      menu_r:
-        ; Ð’Ð¿Ñ€Ð°Ð²Ð¾
-        mov     ax, offset terminate_program;call    terminate_program
+        ; ‚¯à ¢®
+        mov     ax, offset terminate_program
+        jmp     menu_end
 
     menu_end:
         ret
-menu    endp
+menu                endp
 
 
-classic proc
-    ;
-    ;
-        cmp     game_in_progress, 1
-        je      classic_main
-
-    classic_start:
-        ; ÐžÑ‡Ð¸Ñ‰Ð°ÐµÐ¼ Ð¸Ð³Ñ€Ð¾Ð²Ð¾Ðµ Ð¿Ð¾Ð»Ðµ
-        xor     bh, bh          ; Ð”Ð°Ð»ÐµÐµ Ð²ÑÑŽÐ´Ñƒ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ð° #0
+classic_init        proc
+    ; ˆ­¨æ¨ «¨§ æ¨ï à¥¦¨¬  Classic
+    ; Žç¨é ¥¬ ¨£à®¢®¥ ¯®«¥
+        xor     bh, bh          ; „ «¥¥ ¢áî¤ã áâà ­¨æ  #0
         mov     ax, 0010h
         int     10h
-
-        ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ° ÑÑ‡Ñ‘Ñ‚
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;xor     bh, bh         ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ 0,0
+    ; ‘âà®ª  áçñâ
+        mov     ah, 02h         ; Šãàá®à
+        ;xor     bh, bh         ; ¢ ¯®§¨æ¨î 0,0
         xor     dx, dx
         int     10h
         mov     ah, 09h
@@ -711,21 +686,19 @@ classic proc
         int     21h
         mov     ax, score
         call    print_int_3chars
-
-        ; Ð¡Ð¿Ñ€Ð°Ð²ÐºÐ° Ð¿Ð¾ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð°Ð¼
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;xor     bh, bh          ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ 0,15
+    ; ‘¯à ¢ª  ¯® í«¥¬¥­â ¬
+        mov     ah, 02h         ; Šãàá®à
+        ;xor     bh, bh          ; ¢ ¯®§¨æ¨î 0,15
         xor     dx, dx
         mov     dl, 15
         int     10h
-        mov     ah, 09h         ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ° Ð¡Ñ‡Ñ‘Ñ‚
+        mov     ah, 09h         ; ‘âà®ª  ‘çñâ
         lea     dx, str_tutor_classic
         int     21h
 
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;xor     bh, bh         ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ 0,80-len
-        xor     dx, dx
-        mov     dl, 80
+        mov     ah, 02h         ; Šãàá®à
+        ;xor     bh, bh         ; ¢ ¯®§¨æ¨î 0,80-len
+        mov     dx, 80
         sub     dl, str_hotkey_len
         int     10h
         mov     ah, 09h         ; Esc - menu
@@ -739,15 +712,16 @@ classic proc
         mov     al, color_poo
         mov     cx, 20
         call    draw_snake_pixel
-
+    ; ®àâ¨ª ¨ §¬¥©ª 
         call    draw_border
         call    init_snake
-
-        mov     si, score       ;Ð˜Ð½Ð´ÐµÐºÑ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ ÑÐ¸Ð¼Ð²Ð¾Ð»Ð° Ð³Ð¾Ð»Ð¾Ð²Ñ‹
+    ; Š®®à¤¨­ âë £®«®¢ë, å¢®áâ , ­ ¯à ¢«¥­¨¥, ¯¥à¢  ¥¤ 
+        mov     si, score
         dec     si
         shl     si, 1
-        xor     di, di          ;Ð˜Ð½Ð´ÐµÐºÑ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ ÑÐ¸Ð¼Ð²Ð¾Ð»Ð° Ñ…Ð²Ð¾ÑÑ‚Ð°
-        mov     direction, 0100h;direction Ð´Ð»Ñ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð³Ð¾Ð»Ð¾Ð²Ð¾Ð¹. dir[0] - Ð¿Ñ€Ð¸Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ðµ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ x (1 Ð¸Ð»Ð¸ -1), dir[1] - y (1 Ð¸Ð»Ð¸ -1) 
+        xor     di, di          ;ˆ­¤¥ªá ª®®à¤¨­ âë á¨¬¢®«  å¢®áâ 
+        mov     direction, 0100h;direction ¤«ï ã¯à ¢«¥­¨ï £®«®¢®©. dir[0] - ¯à¨à é¥­¨¥ ª®®à¤¨­ âë x (1 ¨«¨ -1), dir[1] - y (1 ¨«¨ -1) 
+        mov     food_eaten, 0
 
         mov     al, color_food
         ;mov     cx, 0800h
@@ -755,15 +729,26 @@ classic proc
         call    add_food
         ;loop    debug_superfood
         mov     game_in_progress, 1
+        mov     current_game, offset classic
+    ret
+classic_init        endp
 
-    classic_main:               ;ÐžÑÐ½Ð¾Ð²Ð½Ð¾Ð¹ Ñ†Ð¸ÐºÐ»
+classic             proc
+    ;
+    ;
+    cmp     game_in_progress, 1
+    je      classic_main
+
+    call classic_init
+
+    classic_main:               ;Žá­®¢­®© æ¨ª«
         cmp     ticks, 2
         jl      classic_main
         mov     ticks, 0
 
     key_press:
-        ; ÐžÐ±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° Ð½Ð°Ð¶Ð°Ñ‚Ð¸Ñ ÐºÐ»Ð°Ð²Ð¸ÑˆÐ¸ Ð¸ Ð¿Ñ€Ð¸ÑÐ²Ð°Ð¸Ð²Ð°Ð½Ð¸Ñ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ Ð¿ÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ð¾Ð¹ direction,
-        ; Ð¾Ñ‚Ð²ÐµÑ‡Ð°ÑŽÑ‰ÐµÐ¹ Ð·Ð° Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð³Ð¾Ð»Ð¾Ð²Ñ‹. Ð£Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ ÑÑ‚Ñ€ÐµÐ»ÐºÐ°Ð¼Ð¸.
+        ; Ž¡à ¡®âª  ­ ¦ â¨ï ª« ¢¨è¨ ¨ ¯à¨á¢ ¨¢ ­¨ï §­ ç¥­¨ï ¯¥à¥¬¥­­®© direction,
+        ; ®â¢¥ç îé¥© §  ­ ¯à ¢«¥­¨¥ £®«®¢ë. “¯à ¢«¥­¨¥ áâà¥«ª ¬¨.
         pusha
             mov     cx, direction
             ;mov     ax, head
@@ -774,13 +759,13 @@ classic proc
             ;mov     al, buffer[di-1]
             mov     ax, 0100h
             int     16h
-            jz      KP_end           ;Ð‘ÐµÐ· Ð½Ð°Ð¶Ð°Ñ‚Ð¸Ñ Ð²Ñ‹Ñ…Ð¾Ð´Ð¸Ð¼
+            jz      KP_end           ; ¥§ ­ ¦ â¨ï ¢ëå®¤¨¬
             xor     ah, ah
             int     16h
             xchg    ah, al
 
-            cmp     al, 1h              ; Ð•ÑÐ»Ð¸ ÑÑ‚Ð¾ Ð¾Ñ‚Ð¶Ð°Ñ‚Ð¸Ðµ ÐºÐ»Ð°Ð²Ð¸ÑˆÐ¸ Esc
-            je      KP_menu              ; Ð—Ð°Ð²ÐµÑ€ÑˆÐ¸Ð¼ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ðµ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹TODO
+            cmp     al, 1h           ; …á«¨ íâ® ®â¦ â¨¥ ª« ¢¨è¨ Esc
+            je      KP_menu          ; ¢¥à­¥¬áï ¢ ¬¥­î
             cmp     al, 50h
             je      KP_down
             cmp     al, 48h
@@ -792,56 +777,58 @@ classic proc
             jmp     KP_end
 
             KP_down:
-            cmp     cx, 0FFFFh       ; Ð¡Ñ€Ð°Ð²Ð½Ð¸Ð²Ð°ÐµÐ¼ Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð½Ðµ Ð¿Ð¾Ð¹Ñ‚Ð¸ Ð½Ð° ÑÐµÐ±Ñ
+            cmp     cx, 0FFFFh      ; ‘à ¢­¨¢ ¥¬ çâ®¡ë ­¥ ¯®©â¨ ­  á¥¡ï
             je      KP_end
-            mov     cx, 0001h       ; Ð’Ð½Ð¸Ð· => x 0, y 1
+            mov     cx, 0001h       ; ‚­¨§ => x 0, y 1
             jmp     KP_end
             KP_up:
             cmp     cx, 0001h
             je      KP_end
-            mov     cx, 0FFFFh      ; Ð’Ð²ÐµÑ€Ñ… => x 0, y -1
+            mov     cx, 0FFFFh      ; ‚¢¥àå => x 0, y -1
             jmp     KP_end
             KP_left:
             cmp     cx, 0100h
             je      KP_end
-            mov     cx, 0FF00h      ; Ð’Ð»ÐµÐ²Ð¾ => x -1, y 0
+            mov     cx, 0FF00h      ; ‚«¥¢® => x -1, y 0
             jmp     KP_end
             KP_right:
             cmp     cx, 0FF00h
             je      KP_end
-            mov     cx, 0100h       ; Ð’Ð¿Ñ€Ð°Ð²Ð¾ => x 1, y 0
+            mov     cx, 0100h       ; ‚¯à ¢® => x 1, y 0
             jmp     KP_end
             KP_menu:
                 popa
-                call    menu
-                call    ax
-            KP_terminate:
-                popa
-                call    terminate_program
+                ret
             KP_end:
                 mov     direction, cx
         popa
 
 
-        mov     dx, [snake+si]      ;Ð‘ÐµÑ€ÐµÐ¼ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñƒ Ð³Ð¾Ð»Ð¾Ð²Ñ‹ Ð¸Ð· Ð¿Ð°Ð¼ÑÑ‚Ð¸
-        add     dx, direction       ;Ð˜Ð·Ð¼ÐµÐ½ÑÐµÐ¼ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ Ð² Ð·Ð°Ð²Ð¸ÑÐ¸Ð¼Ð¾ÑÑ‚Ð¸ Ð¾Ñ‚ Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ
+        mov     dx, [snake+si]      ;¥à¥¬ ª®®à¤¨­ âã £®«®¢ë ¨§ ¯ ¬ïâ¨
+        add     dx, direction       ;ˆ§¬¥­ï¥¬ ª®®à¤¨­ âë ¢ § ¢¨á¨¬®áâ¨ ®â ­ ¯à ¢«¥­¨ï
         inc     si              
         inc     si
         and     si, 0FFh
-        mov     [snake+si], dx      ;Ð—Ð°Ð½Ð¾ÑÐ¸Ð¼ Ð² Ð¿Ð°Ð¼ÑÑ‚ÑŒ Ð½Ð¾Ð²ÑƒÑŽ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñƒ Ð³Ð¾Ð»Ð¾Ð²Ñ‹ Ð·Ð¼ÐµÐ¸
+        mov     [snake+si], dx      ;‡ ­®á¨¬ ¢ ¯ ¬ïâì ­®¢ãî ª®®à¤¨­ âã £®«®¢ë §¬¥¨
 
         xor     cx, cx
         mov     cl, dh              ; cx - x
         xor     dh, dh              ; dx - y
-        call    check_head_position ; ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ¸ Ð½Ð° ÑÑ‚Ð¾Ð»ÐºÐ½Ð¾Ð²ÐµÐ½Ð¸Ñ ÑÐ¾ ÑÑ‚ÐµÐ½Ð°Ð¼Ð¸, ÑÐ¾Ð±Ð¾Ð¹, ÐºÐ°ÐºÐ°Ñ…Ð¾Ð¹
+        call    check_head_position ; à®¢¥àª¨ ­  áâ®«ª­®¢¥­¨ï á® áâ¥­ ¬¨, á®¡®©, ª ª å®©
 
         pushf
-        ; ÐšÐ¾Ð³Ð´Ð° Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ñ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐµÐ½Ð°, Ð¼Ð¾Ð¶Ð½Ð¾ Ð½Ð°Ñ€Ð¸ÑÐ¾Ð²Ð°Ñ‚ÑŒ Ñ‚Ð°Ð¼ Ð³Ð¾Ð»Ð¾Ð²Ñƒ        
-        mov     al, color_snake
-        call    draw_snake_pixel
+            cmp     game_over, 1
+            jne     draw_head
+            popf
+            mov     game_in_progress, 0
+            ret
+            draw_head:
+            ; Š®£¤  ¯®§¨æ¨ï ¯à®¢¥à¥­ , ¬®¦­® ­ à¨á®¢ âì â ¬ £®«®¢ã        
+            mov     al, color_snake
+            call    draw_snake_pixel
         popf
 
-        ; Ð¡Ñ‚Ð¾Ð¸Ñ‚ Ð»Ð¸ ÑÑ‚Ð¸Ñ€Ð°Ñ‚ÑŒ Ñ…Ð²Ð¾ÑÑ‚?
+        ; ‘â®¨â «¨ áâ¨à âì å¢®áâ?
         jnc     erase_tail
         jmp     classic_main
  
@@ -857,24 +844,18 @@ classic proc
         and     di, 0FFh
         jmp     classic_main
     ret
-classic endp
+classic             endp
 
 
-modern proc
-    ;
-    ;
-        cmp     game_in_progress, 1
-        je      modern_main
-
-    modern_start:
-        ; ÐžÑ‡Ð¸Ñ‰Ð°ÐµÐ¼ Ð¸Ð³Ñ€Ð¾Ð²Ð¾Ðµ Ð¿Ð¾Ð»Ðµ
-        xor     bh, bh          ; Ð”Ð°Ð»ÐµÐµ Ð²ÑÑŽÐ´Ñƒ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ð° #0
+modern_init         proc
+    ; ˆ­¨æ¨ «¨§ æ¨ï à¥¦¨¬  Modern
+    ; Žç¨é ¥¬ ¨£à®¢®¥ ¯®«¥
+        xor     bh, bh          ; „ «¥¥ ¢áî¤ã áâà ­¨æ  #0
         mov     ax, 0010h
         int     10h
-
-        ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ° ÑÑ‡Ñ‘Ñ‚
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;xor     bh, bh         ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ 0,0
+    ; ‘âà®ª  áçñâ
+        mov     ah, 02h         ; Šãàá®à
+        ;xor     bh, bh         ; ¢ ¯®§¨æ¨î 0,0
         xor     dx, dx
         int     10h
         mov     ah, 09h
@@ -882,24 +863,22 @@ modern proc
         int     21h
         mov     ax, score
         call    print_int_3chars
-
-        ; Ð¡Ð¿Ñ€Ð°Ð²ÐºÐ° Ð¿Ð¾ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð°Ð¼
-        mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;xor     bh, bh          ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ 0,15
+    ; ‘¯à ¢ª  ¯® í«¥¬¥­â ¬
+        mov     ah, 02h         ; Šãàá®à
+        ;xor     bh, bh          ; ¢ ¯®§¨æ¨î 0,15
         xor     dx, dx
         mov     dl, 15
         int     10h
-        mov     ah, 09h         ; Ð¡Ñ‚Ñ€Ð¾ÐºÐ° Ð¡Ñ‡Ñ‘Ñ‚
+        mov     ah, 09h         ; ‘âà®ª  ‘çñâ
         lea     dx, str_tutor_modern
         int     21h
         
-        ;mov     ah, 02h         ; ÐšÑƒÑ€ÑÐ¾Ñ€
-        ;;xor     bh, bh         ; Ð² Ð¿Ð¾Ð·Ð¸Ñ†Ð¸ÑŽ 0,80-len
-        ;xor     dx, dx
-        ;mov     dl, 80
-        ;sub     dl, str_hotkey_len
-        ;int     10h
-        ;mov     ah, 09h         ; Esc - menu
+        mov     ah, 02h         ; Šãàá®à
+        ;xor     bh, bh         ; ¢ ¯®§¨æ¨î 0,80-len
+        mov     dx, 80
+        sub     dl, str_hotkey_len
+        int     10h
+        mov     ah, 09h         ; Esc - menu
         lea     dx, str_hotkey
         int     21h
 
@@ -919,15 +898,19 @@ modern proc
         mov     al, color_speed_down
         mov     cx, 46
         call    draw_snake_pixel
-
+    ; ®àâ¨ª ¨ §¬¥©ª 
         call    draw_border
         call    init_snake
-
-        mov     si, score       ;Ð˜Ð½Ð´ÐµÐºÑ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ ÑÐ¸Ð¼Ð²Ð¾Ð»Ð° Ð³Ð¾Ð»Ð¾Ð²Ñ‹
+    ; ˆ­¨æ¨ «¨§ æ¨ï £®«®¢ë ¨ å¢®áâ , ­ ¯à ¢«¥­¨ï
+        mov     si, score
         dec     si
         shl     si, 1
-        xor     di, di          ;Ð˜Ð½Ð´ÐµÐºÑ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ ÑÐ¸Ð¼Ð²Ð¾Ð»Ð° Ñ…Ð²Ð¾ÑÑ‚Ð°
-        mov     direction, 0100h;direction Ð´Ð»Ñ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð³Ð¾Ð»Ð¾Ð²Ð¾Ð¹. dir[0] - Ð¿Ñ€Ð¸Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ðµ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ x (1 Ð¸Ð»Ð¸ -1), dir[1] - y (1 Ð¸Ð»Ð¸ -1) 
+        xor     di, di          ;ˆ­¤¥ªá ª®®à¤¨­ âë á¨¬¢®«  å¢®áâ 
+        mov     direction, 0100h;direction ¤«ï ã¯à ¢«¥­¨ï £®«®¢®©. dir[0] - ¯à¨à é¥­¨¥ ª®®à¤¨­ âë x (1 ¨«¨ -1), dir[1] - y (1 ¨«¨ -1)
+        mov     food_eaten, 0
+        mov     speed_multiplier, 0
+        mov     bx, 0FFFFh
+        call    reprogram_pit
 
         mov     al, color_food
         ;mov     cx, 0800h
@@ -935,15 +918,26 @@ modern proc
         call    add_food
         ;loop    debug_superfood
         mov     game_in_progress, 1
+        mov     current_game, offset modern
+    ret
+modern_init         endp
 
-    modern_main:               ;ÐžÑÐ½Ð¾Ð²Ð½Ð¾Ð¹ Ñ†Ð¸ÐºÐ»
+modern              proc
+    ;
+    ;
+    cmp     game_in_progress, 1
+    je      modern_main
+
+    call modern_init
+
+    modern_main:               ;Žá­®¢­®© æ¨ª«
         cmp     ticks, 2
         jl      modern_main
         mov     ticks, 0
 
     M_key_press:
-        ; ÐžÐ±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° Ð½Ð°Ð¶Ð°Ñ‚Ð¸Ñ ÐºÐ»Ð°Ð²Ð¸ÑˆÐ¸ Ð¸ Ð¿Ñ€Ð¸ÑÐ²Ð°Ð¸Ð²Ð°Ð½Ð¸Ñ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ Ð¿ÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ð¾Ð¹ direction,
-        ; Ð¾Ñ‚Ð²ÐµÑ‡Ð°ÑŽÑ‰ÐµÐ¹ Ð·Ð° Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð³Ð¾Ð»Ð¾Ð²Ñ‹. Ð£Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ ÑÑ‚Ñ€ÐµÐ»ÐºÐ°Ð¼Ð¸.
+        ; Ž¡à ¡®âª  ­ ¦ â¨ï ª« ¢¨è¨ ¨ ¯à¨á¢ ¨¢ ­¨ï §­ ç¥­¨ï ¯¥à¥¬¥­­®© direction,
+        ; ®â¢¥ç îé¥© §  ­ ¯à ¢«¥­¨¥ £®«®¢ë. “¯à ¢«¥­¨¥ áâà¥«ª ¬¨.
         pusha
             mov     cx, direction
 
@@ -955,13 +949,13 @@ modern proc
             ;mov     al, buffer[di-1]
             mov     ax, 0100h
             int     16h
-            jz      M_KP_end           ;Ð‘ÐµÐ· Ð½Ð°Ð¶Ð°Ñ‚Ð¸Ñ Ð²Ñ‹Ñ…Ð¾Ð´Ð¸Ð¼
+            jz      M_KP_end           ;¥§ ­ ¦ â¨ï ¢ëå®¤¨¬
             xor     ah, ah
             int     16h
             xchg    ah, al
 
-            cmp     al, 1h              ; Ð•ÑÐ»Ð¸ ÑÑ‚Ð¾ Ð¾Ñ‚Ð¶Ð°Ñ‚Ð¸Ðµ ÐºÐ»Ð°Ð²Ð¸ÑˆÐ¸ Esc
-            je      M_KP_menu              ; Ð—Ð°Ð²ÐµÑ€ÑˆÐ¸Ð¼ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ðµ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹
+            cmp     al, 1h              ; …á«¨ íâ® ®â¦ â¨¥ ª« ¢¨è¨ Esc
+            je      M_KP_menu              ; ‡ ¢¥àè¨¬ ¢ë¯®«­¥­¨¥ ¯à®£à ¬¬ë
             cmp     al, 50h
             je      M_KP_down
             cmp     al, 48h
@@ -973,32 +967,28 @@ modern proc
             jmp     M_KP_end
 
             M_KP_down:
-            cmp     cx, 0FFFFh       ; Ð¡Ñ€Ð°Ð²Ð½Ð¸Ð²Ð°ÐµÐ¼ Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð½Ðµ Ð¿Ð¾Ð¹Ñ‚Ð¸ Ð½Ð° ÑÐµÐ±Ñ
+            cmp     cx, 0FFFFh       ; ‘à ¢­¨¢ ¥¬ çâ®¡ë ­¥ ¯®©â¨ ­  á¥¡ï
             je      M_KP_end
-            mov     cx, 0001h       ; Ð’Ð½Ð¸Ð· => x 0, y 1
+            mov     cx, 0001h       ; ‚­¨§ => x 0, y 1
             jmp     M_KP_end
             M_KP_up:
             cmp     cx, 0001h
             je      M_KP_end
-            mov     cx, 0FFFFh      ; Ð’Ð²ÐµÑ€Ñ… => x 0, y -1
+            mov     cx, 0FFFFh      ; ‚¢¥àå => x 0, y -1
             jmp     M_KP_end
             M_KP_left:
             cmp     cx, 0100h
             je      M_KP_end
-            mov     cx, 0FF00h      ; Ð’Ð»ÐµÐ²Ð¾ => x -1, y 0
+            mov     cx, 0FF00h      ; ‚«¥¢® => x -1, y 0
             jmp     M_KP_end
             M_KP_right:
             cmp     cx, 0FF00h
             je      M_KP_end
-            mov     cx, 0100h       ; Ð’Ð¿Ñ€Ð°Ð²Ð¾ => x 1, y 0
+            mov     cx, 0100h       ; ‚¯à ¢® => x 1, y 0
             jmp     M_KP_end
             M_KP_menu:
                 popa
-                call    menu
-                call    ax
-            M_KP_terminate:
-                popa
-                call    terminate_program
+                ret
             M_KP_end:
                 mov     direction, cx
         popa
@@ -1007,37 +997,43 @@ modern proc
         ;jl      modern_main
         ;mov     ticks, 0
 
-    
+
         ;mov     dx, direction
         ;mov     actual_direction, dx
-        mov     dx, [snake+si]      ;Ð‘ÐµÑ€ÐµÐ¼ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñƒ Ð³Ð¾Ð»Ð¾Ð²Ñ‹ Ð¸Ð· Ð¿Ð°Ð¼ÑÑ‚Ð¸
-        add     dx, direction       ;Ð˜Ð·Ð¼ÐµÐ½ÑÐµÐ¼ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñ‹ Ð² Ð·Ð°Ð²Ð¸ÑÐ¸Ð¼Ð¾ÑÑ‚Ð¸ Ð¾Ñ‚ Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ
+        mov     dx, [snake+si]      ;¥à¥¬ ª®®à¤¨­ âã £®«®¢ë ¨§ ¯ ¬ïâ¨
+        add     dx, direction       ;ˆ§¬¥­ï¥¬ ª®®à¤¨­ âë ¢ § ¢¨á¨¬®áâ¨ ®â ­ ¯à ¢«¥­¨ï
         inc     si              
         inc     si
         and     si, 0FFh
-        mov     [snake+si], dx      ;Ð—Ð°Ð½Ð¾ÑÐ¸Ð¼ Ð² Ð¿Ð°Ð¼ÑÑ‚ÑŒ Ð½Ð¾Ð²ÑƒÑŽ ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚Ñƒ Ð³Ð¾Ð»Ð¾Ð²Ñ‹ Ð·Ð¼ÐµÐ¸
+        mov     [snake+si], dx      ;‡ ­®á¨¬ ¢ ¯ ¬ïâì ­®¢ãî ª®®à¤¨­ âã £®«®¢ë §¬¥¨
 
         xor     cx, cx
         mov     cl, dh              ; cx - x
         xor     dh, dh              ; dx - y
-        call    check_head_position ; ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ¸ Ð½Ð° ÑÑ‚Ð¾Ð»ÐºÐ½Ð¾Ð²ÐµÐ½Ð¸Ñ ÑÐ¾ ÑÑ‚ÐµÐ½Ð°Ð¼Ð¸, ÑÐ¾Ð±Ð¾Ð¹, ÐºÐ°ÐºÐ°Ñ…Ð¾Ð¹
+        call    check_head_position ; à®¢¥àª¨ ­  áâ®«ª­®¢¥­¨ï á® áâ¥­ ¬¨, á®¡®©, ª ª å®©
 
         pushf
-        ; ÐšÐ¾Ð³Ð´Ð° Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ñ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐµÐ½Ð°, Ð¼Ð¾Ð¶Ð½Ð¾ Ð½Ð°Ñ€Ð¸ÑÐ¾Ð²Ð°Ñ‚ÑŒ Ñ‚Ð°Ð¼ Ð³Ð¾Ð»Ð¾Ð²Ñƒ        
-        mov     al, color_snake
-        call    draw_snake_pixel
+            cmp     game_over, 1
+            jne     M_draw_head
+            popf
+            mov     game_in_progress, 0
+            ret
+            M_draw_head:
+            ; Š®£¤  ¯®§¨æ¨ï ¯à®¢¥à¥­ , ¬®¦­® ­ à¨á®¢ âì â ¬ £®«®¢ã        
+            mov     al, color_snake
+            call    draw_snake_pixel
         popf
 
-        ; Ð¡Ñ‚Ð¾Ð¸Ñ‚ Ð»Ð¸ ÑÑ‚Ð¸Ñ€Ð°Ñ‚ÑŒ Ñ…Ð²Ð¾ÑÑ‚? Ð¢Ð¾ ÐµÑÑ‚ÑŒ ÑÑŠÐµÐ»Ð¸ Ð»Ð¸ ÑÐ±Ð»Ð¾ÐºÐ¾?
+        ; ‘â®¨â «¨ áâ¨à âì å¢®áâ? ’® ¥áâì áê¥«¨ «¨ ï¡«®ª®?
         jnc     M_erase_tail
 
-        ; Ð•ÑÐ»Ð¸ ÑÐ±Ð»Ð¾ÐºÐ¾ ÑÑŠÐµÐ´ÐµÐ½Ð¾ - Ð²ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð·Ð²ÑƒÐº
+        ; …á«¨ ï¡«®ª® áê¥¤¥­® - ¢ª«îç¨âì §¢ãª
         mov     bx, 01000h
         call    reprogram_pit
         mov     ax, food_eaten
 
-        mov     ah, 2           ; 2 Ð¾ÐºÑ‚Ð°Ð²Ð° (Ð‘Ð¾Ð»ÑŒÑˆÐ°Ñ)
-        mov     bl, 16          ; 16-Ð°Ñ Ð½Ð¾Ñ‚Ð°
+        mov     ah, 2           ; 2 ®ªâ ¢  (®«ìè ï)
+        mov     bl, 16          ; 16- ï ­®â 
         mov     cx, 128         ; 128 bpm
         
         add     al, 0
@@ -1072,21 +1068,26 @@ modern proc
         and     di, 0FFh
         jmp     modern_main
     ret
-modern endp
+modern              endp
 
 
 original_videomode  db  ?
 original_videopage  db  ?
 
 game_in_progress    db  0
+game_over           db  0
+current_game        dw  ?
 score               dw  2
-food_eaten          dw  0             ; Ð¡Ñ‡ÐµÑ‚Ñ‡Ð¸Ðº ÑÑŠÐµÐ´ÐµÐ½Ð½Ñ‹Ñ…
+snake               dw  0100h
+                    dw  0200h
+                    dw  100h  dup('?')
+food_eaten          dw  0             ; ‘ç¥âç¨ª áê¥¤¥­­ëå
 direction           dw  0100h         ; xx;yy
 ;actual_direction    dw  0100h         ; xx;yy
 speed_multiplier    dw  0
 speed_freq_x1000    db  04h           ; => freq_step = 08000h
 
-thickness           dw  8             ; Ð¢Ð¾Ð»Ñ‰Ð¸Ð½Ð° Ð»Ð¸Ð½Ð¸Ð¹ Ð¸ Ñ€Ð°Ð·Ð¼ÐµÑ€ ÐºÐ»ÐµÑ‚ÐºÐ¸
+thickness           dw  8             ; ’®«é¨­  «¨­¨© ¨ à §¬¥à ª«¥âª¨
 
 color_poo           db  06h
 color_food           db  0Ah
@@ -1111,6 +1112,10 @@ str_resume1         db  'PAUSE','$'
 str_resume1_len     db  $-str_resume1
 str_resume2         db  'Esc - Resume game','$'
 str_resume2_len     db  $-str_resume2
+str_gameover1       db  'GAME OVER','$'
+str_gameover1_len   db  $-str_gameover1
+str_gameover2       db  'Your score: ','$'
+str_gameover2_len   db  $-str_gameover2
 str_tutor_classic   db  'Apple   Poo','$'
 str_tutor_modern    db  'Apple   Poo   Mushroom   Chilli   Ice','$'
 str_hotkey          db  '[Esc - menu]','$'
@@ -1125,8 +1130,5 @@ RND_seed2           dw  ?             ; random number seeds
 ;tail        dw      0
 ;old_09h     dw      ?, ?
 
-snake               dw  0100h
-                    dw  0200h
-                    dw  100h  dup('?')
 
 end	    @entry
