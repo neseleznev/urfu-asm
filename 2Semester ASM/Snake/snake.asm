@@ -179,29 +179,14 @@ add_food proc
 add_food endp
 
 
-game_over proc
-    push dx
-    mov ah, 02h 
-    xor bh, bh
-    xor dx, dx
-    int 10h
-    
-    push cx
-    mov cx, 20
-    llll:
-        ;call print_space
-        loop llll
-    pop cx
+check_head_position proc
+    ; Проверить, что находится на желаемой для головы позиции,
+    ; обработать
+    ; Вход:     cx - x (в нашей сетке (80-2)x(40-2))
+    ;           dx - y
+    ; Результат:
+    ;           CF=1, если не нужно стирать хвост (мы съели яблоко)
 
-    int 10h
-    
-    mov ax, cx
-    ;call print_int2
-    ;call print_space
-    pop dx
-    mov ax, dx
-    ;call print_int2
-    ;call print_space
     ; Проверяем границы поля
         cmp     cx, 78
         jge     GO_exit
@@ -212,45 +197,100 @@ game_over proc
         xor     bh, bh
         push cx
         push dx
+        inc     cx
+        inc     dx
         shl     cx, 3           ; cx*8 (ширина ячейки)
         shl     dx, 3           ; аналогично
         add     dx, 15          ; отступ для текста и прочего
-        add     cx, 8
-        add     dx, 8
+        ;add     cx, 8 коммент
+        ;add     dx, 8 в пользу inc перед умножением на 8 (выше)
         int     10h
         pop dx
         pop cx
         
-        cmp     al, color_speed_up         ; Speed-up
+        cmp     al, color_food       ; Яблоко
+        je      GO_food
+        cmp     al, color_speed_up       ; Speed-up
         je      GO_increase_speed
-        cmp     al, color_speed_down         ; Speed-down
+        cmp     al, color_speed_down     ; Speed-down
         je      GO_decrease_speed
         cmp     al, color_border         ; Стенка
         je      GO_exit
-        cmp     al, color_poo         ; Какашки
+        cmp     al, color_poo            ; Какашки
         je      GO_exit
-        cmp     al, color_snake         ; Змейка
+        cmp     al, color_snake          ; Змейка
         je      GO_exit
-        jmp     GO_good
-    GO_increase_speed:
-        inc     speed_multiplier
-        inc     speed_multiplier
-        ;jmp     GO_good
-    GO_decrease_speed:
-        dec     speed_multiplier
-        pusha
-        mov     bx, 0FFFFh
-        mov     ax, 02000h
-        mul     speed_multiplier
-        sub     bx, ax
-        call    reprogram_pit
-        popa
         jmp     GO_good
     GO_exit:
-        call terminate_program
-    GO_good:
+        call    terminate_program
+    
+    GO_food:
+        push    cx
+        push    dx
+        inc     score               ; Увеличим счёт
+
+        ; Какашки
+        inc     food_eaten
+        cmp     food_eaten, 5
+        jl      WC_not_now
+        mov     food_eaten, 0
+        mov     al, color_poo
+        mov     dx, [snake+di-2]
+        mov     cl, dh              ; cx - x
+        xor     dh, dh              ; dx - y
+        call    draw_snake_pixel
+     WC_not_now:
+     print_score:
+        mov     ah, 02h         ; Курсор
+        xor     bh, bh          ; в позицию 0,0
+        xor     dx, dx
+        mov     dl, str_score_len
+        int     10h
+        
+        mov     ax, score
+        call    print_int_3chars
+
+        mov     al, color_food
+        call    add_food
+        pop     dx
+        pop     cx
+        stc
         ret
-game_over endp
+
+    GO_increase_speed:
+        xor     ah, ah                    ; 0->1, 1->2, ..., 7->7
+        mov     al, speed_freq_x1000
+        push dx
+        inc speed_multiplier
+        mul     speed_multiplier          ; Проверим, что желаемый делитель
+        dec speed_multiplier            
+        pop dx
+
+        cmp     ax, 0Fh                   ; частоты не превзойдёт FFFFh
+        jg      GO_good                   ; pass_increasing
+
+        inc     speed_multiplier
+        inc     speed_multiplier
+    GO_decrease_speed:
+        cmp     speed_multiplier, 0      ; 7->6, 6->5, 0->0
+        je      GO_good                  ; pass_decreasing
+        dec     speed_multiplier
+        pusha
+
+        mov     ah, speed_freq_x1000
+        shl     ah, 4
+        xor     al, al
+        mul     speed_multiplier
+        mov     bx, 0FFFFh
+        sub     bx, ax
+        call    reprogram_pit
+        
+        popa
+        ;jmp     GO_good
+    GO_good:
+        clc
+        ret
+check_head_position endp
 
 terminate_program proc
 
@@ -423,6 +463,22 @@ init_snake  proc
         loop    IS
     ret
 init_snake  endp
+
+init_snake2  proc
+    mov     al, color_snake
+    mov     si, score
+    IS2:
+        mov     dx, [snake+si]
+        xor     ch, ch
+        mov     cl, dh
+        xor     dh, dh
+        call    draw_snake_pixel
+        dec si
+        dec si
+        test    si, si
+        jns     IS2
+    ret
+init_snake2  endp
 
 
 @start:
@@ -605,6 +661,9 @@ menu    proc
         jne     menu_not_ud
         ; Вверх - classic
         mov     game_in_progress, 0  ; New classic
+        mov     score, 2
+        mov     [snake+0], 0100h
+        mov     [snake+2], 0200h
         mov     ax, offset classic   ; game
         jmp     menu_end
      menu_not_ud:
@@ -612,6 +671,9 @@ menu    proc
         jne     menu_not_udl
         ; Влево - modern
         mov     game_in_progress, 0  ; New modern
+        mov     score, 2
+        mov     [snake+0], 0100h
+        mov     [snake+2], 0200h
         mov     ax, offset modern    ; game
         jmp     menu_end
      menu_not_udl:
@@ -659,6 +721,17 @@ classic proc
         mov     ah, 09h         ; Строка Счёт
         lea     dx, str_tutor_classic
         int     21h
+
+        mov     ah, 02h         ; Курсор
+        ;xor     bh, bh         ; в позицию 0,80-len
+        xor     dx, dx
+        mov     dl, 80
+        sub     dl, str_hotkey_len
+        int     10h
+        mov     ah, 09h         ; Esc - menu
+        lea     dx, str_hotkey
+        int     21h
+
         mov     al, color_food
         mov     cx, 12
         mov     dx, -3
@@ -684,17 +757,15 @@ classic proc
         mov     game_in_progress, 1
 
     classic_main:               ;Основной цикл
-        ;call    delay
         cmp     ticks, 2
         jl      classic_main
         mov     ticks, 0
 
-     key_press:
+    key_press:
         ; Обработка нажатия клавиши и присваивания значения переменной direction,
         ; отвечающей за направление головы. Управление стрелками.
         pusha
             mov     cx, direction
-
             ;mov     ax, head
             ;cmp     ax, tail
             ;je      classic_main
@@ -751,12 +822,7 @@ classic proc
                 mov     direction, cx
         popa
 
-        ;cmp     ticks, 2
-        ;jl      classic_main
-        ;mov     ticks, 0
 
-        ;mov     dx, direction
-        ;mov     actual_direction, dx
         mov     dx, [snake+si]      ;Берем координату головы из памяти
         add     dx, direction       ;Изменяем координаты в зависимости от направления
         inc     si              
@@ -767,58 +833,19 @@ classic proc
         xor     cx, cx
         mov     cl, dh              ; cx - x
         xor     dh, dh              ; dx - y
-        call    game_over           ; Проверки на столкновения со стенами, собой, какахой
+        call    check_head_position ; Проверки на столкновения со стенами, собой, какахой
 
-        ; Яблоко
-            ; Проверяем позицию
-            mov     ah, 0Dh         ; Read Pixel
-            xor     bh, bh
-            push cx
-            push dx
-            shl     cx, 3           ; cx*8 (ширина ячейки)
-            shl     dx, 3           ; аналогично
-            add     dx, 15          ; отступ для текста и прочего
-            add     cx, 8
-            add     dx, 8
-            int     10h
-            pop dx
-            pop cx
-
-            mov     ah, al ; Сохраним цвет под головой
-            ; Когда позиция проверена, можно нарисовать там голову        
-            mov     al, color_snake
-            call    draw_snake_pixel
-
-            cmp     ah, color_food          ; яблочки
-        jne     next
-        inc     score
-
-        ; Какашки
-        inc     food_eaten
-        cmp     food_eaten, 6
-        jl      WC_not_now
-        mov     food_eaten, 0
-        mov     al, color_poo
-        mov     dx, [snake+di-2]
-        mov     cl, dh              ; cx - x
-        xor     dh, dh              ; dx - y
+        pushf
+        ; Когда позиция проверена, можно нарисовать там голову        
+        mov     al, color_snake
         call    draw_snake_pixel
-     WC_not_now:
-     print_score:
-        mov     ah, 02h         ; Курсор
-        xor     bh, bh          ; в позицию 0,0
-        xor     dx, dx
-        mov     dl, str_score_len
-        int     10h
-        
-        mov     ax, score
-        call    print_int_3chars
+        popf
 
-        mov     al, color_food
-        call    add_food
+        ; Стоит ли стирать хвост?
+        jnc     erase_tail
         jmp     classic_main
-        
-     next:
+ 
+    erase_tail:
         mov     dx, [snake+di]
         mov     al, 0
         xor     cx, cx
@@ -865,6 +892,17 @@ modern proc
         mov     ah, 09h         ; Строка Счёт
         lea     dx, str_tutor_modern
         int     21h
+        
+        ;mov     ah, 02h         ; Курсор
+        ;;xor     bh, bh         ; в позицию 0,80-len
+        ;xor     dx, dx
+        ;mov     dl, 80
+        ;sub     dl, str_hotkey_len
+        ;int     10h
+        ;mov     ah, 09h         ; Esc - menu
+        lea     dx, str_hotkey
+        int     21h
+
         mov     al, color_food
         mov     cx, 12
         mov     dx, -3
@@ -896,17 +934,14 @@ modern proc
         ;debug_superfood:
         call    add_food
         ;loop    debug_superfood
-        mov     ticks, 0
         mov     game_in_progress, 1
 
     modern_main:               ;Основной цикл
-        ;call    delay
         cmp     ticks, 2
         jl      modern_main
         mov     ticks, 0
 
-
-     M_key_press:
+    M_key_press:
         ; Обработка нажатия клавиши и присваивания значения переменной direction,
         ; отвечающей за направление головы. Управление стрелками.
         pusha
@@ -927,10 +962,6 @@ modern proc
 
             cmp     al, 1h              ; Если это отжатие клавиши Esc
             je      M_KP_menu              ; Завершим выполнение программы
-            ;cmp     al, 0Dh             ; Если это нажатие клавиши +,
-            ;je      KP_terminate  ;     увеличим темп
-            ;cmp     al, 0Ch             ; Если это отжатие клавиши -,
-            ;je      KP_terminate  ;     уменьшим темп
             cmp     al, 50h
             je      M_KP_down
             cmp     al, 48h
@@ -976,6 +1007,7 @@ modern proc
         ;jl      modern_main
         ;mov     ticks, 0
 
+    
         ;mov     dx, direction
         ;mov     actual_direction, dx
         mov     dx, [snake+si]      ;Берем координату головы из памяти
@@ -988,33 +1020,18 @@ modern proc
         xor     cx, cx
         mov     cl, dh              ; cx - x
         xor     dh, dh              ; dx - y
-        call    game_over           ; Проверки на столкновения со стенами, собой, какахой
+        call    check_head_position ; Проверки на столкновения со стенами, собой, какахой
 
-        ; Яблоко
-            ; Проверяем позицию
-            mov     ah, 0Dh         ; Read Pixel
-            xor     bh, bh
-            push cx
-            push dx
-            shl     cx, 3           ; cx*8 (ширина ячейки)
-            shl     dx, 3           ; аналогично
-            add     dx, 15          ; отступ для текста и прочего
-            add     cx, 8
-            add     dx, 8
-            int     10h
-            pop dx
-            pop cx
+        pushf
+        ; Когда позиция проверена, можно нарисовать там голову        
+        mov     al, color_snake
+        call    draw_snake_pixel
+        popf
 
-            mov     ah, al ; Сохраним цвет под головой
-            ; Когда позиция проверена, можно нарисовать там голову        
-            mov     al, color_snake
-            call    draw_snake_pixel
+        ; Стоит ли стирать хвост? То есть съели ли яблоко?
+        jnc     M_erase_tail
 
-            cmp     ah, color_food          ; яблочки
-        jne     M_next
-        inc     score
-
-        ; Звук
+        ; Если яблоко съедено - включить звук
         mov     bx, 01000h
         call    reprogram_pit
         mov     ax, food_eaten
@@ -1025,50 +1042,25 @@ modern proc
         
         add     al, 0
         call    play_note
-        add     al, 7
+        add     al, 5
         call    play_note
         call    no_sound
 
         mov     bx, 0FFFFh
-        mov     ax, 02000h
+        mov     ah, speed_freq_x1000
+        shl     ah, 4
+        xor     al, al
         mul     speed_multiplier
         sub     bx, ax
         call    reprogram_pit
 
-        ; Какашки
-        inc     food_eaten
-        cmp     food_eaten, 6
-        jl      M_WC_not_now
-        mov     food_eaten, 0
-        mov     al, color_poo
-        mov     dx, [snake+di-2]
-        mov     cl, dh              ; cx - x
-        xor     dh, dh              ; dx - y
-        call    draw_snake_pixel
-        ;inc     speed_multiplier
-        ; TODO speedup сразу
-            mov     al, color_speed_up
-        call    add_food
-            mov     al, color_speed_down
-        call    add_food
-     M_WC_not_now:
-        
-
-     M_print_score:
-        mov     ah, 02h         ; Курсор
-        xor     bh, bh          ; в позицию 0,0
-        xor     dx, dx
-        mov     dl, str_score_len
-        int     10h
-        
-        mov     ax, score
-        call    print_int_3chars
-
-        mov     al, color_food
-        call    add_food
+                    mov     al, color_speed_up
+                    call    add_food
+                    mov     al, color_speed_down
+                    call    add_food
         jmp     modern_main
         
-     M_next:
+    M_erase_tail:
         mov     dx, [snake+di]
         mov     al, 0
         xor     cx, cx
@@ -1092,6 +1084,7 @@ food_eaten          dw  0             ; Счетчик съеденных
 direction           dw  0100h         ; xx;yy
 ;actual_direction    dw  0100h         ; xx;yy
 speed_multiplier    dw  0
+speed_freq_x1000    db  04h           ; => freq_step = 08000h
 
 thickness           dw  8             ; Толщина линий и размер клетки
 
@@ -1110,8 +1103,6 @@ str_classic         db  'Classic mode','$'
 str_classic_len     db  $-str_classic
 str_modern          db  'Modern mode','$'
 str_modern_len      db  $-str_modern
-str_left            db  '[TODO left]','$'
-str_left_len        db  $-str_left
 str_right           db  '[TODO right]','$'
 str_right_len       db  $-str_right
 str_exit            db  'Exit','$'
@@ -1120,8 +1111,10 @@ str_resume1         db  'PAUSE','$'
 str_resume1_len     db  $-str_resume1
 str_resume2         db  'Esc - Resume game','$'
 str_resume2_len     db  $-str_resume2
-str_tutor_classic   db  'Apple   Poo   ','$'
+str_tutor_classic   db  'Apple   Poo','$'
 str_tutor_modern    db  'Apple   Poo   Mushroom   Chilli   Ice','$'
+str_hotkey          db  '[Esc - menu]','$'
+str_hotkey_len      db  $-str_hotkey
 
 RND_const           dw  8405h         ; multiplier value
 RND_seed1           dw  ?
