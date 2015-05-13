@@ -287,6 +287,59 @@ check_head_position proc
         ret
 check_head_position endp
 
+mushroom_effect     proc
+    pusha
+    mov     ax, 0501h
+    int     10h
+
+    mov     ax, 0A800h;0A000h
+    mov     es, ax
+
+    mov     si, 1;4;8
+    ME_loop:
+        mov     cx, 640-1;-8
+        ME_x:
+            mov     dx, 320-1;350-1-15;-8
+            ME_y:
+
+                mov     ah, 0Dh         ; Read Pixel
+                xor     bh, bh
+                int     10h
+
+                test    al, al
+                jz      pass_drawing
+
+                ;add     ax, si
+                ;mov     al, cl
+
+                push dx
+                mov     ax, dx
+                mov     dx, 320
+                mul     dx
+                mov     di, ax
+                add     di, cx
+                mov     es:[di], 1;si
+                ;mov     ah, 0Ch
+                ;mov     bh, 1
+                ;int     10h
+                pop dx
+
+                pass_drawing:
+
+                dec     dx
+                cmp     dx, 0;15;+8
+                jge     ME_y
+            loop    ME_x
+        dec     si
+        cmp     si, 0;8
+        jge     ME_loop
+        ;loop    ME_loop
+    mov     ax, 0500h
+    int     10h
+    popa
+    ret
+mushroom_effect     endp
+
 terminate_program   proc
 
     call    stop_play_note  
@@ -609,7 +662,7 @@ menu                proc
     ; TODO Небольшая задержка - защита от случайного нажатия стрелки
     mov     ticks, 0
     menu_delay:               ;Основной цикл
-        cmp     ticks, 50
+        cmp     ticks, 5
         jl      menu_delay
 
     menu_loop:
@@ -956,8 +1009,33 @@ modern              proc
             xor     dh, dh
             call    draw_snake_pixel
         popa
-
         M_no_speed:
+
+        cmp     mushroom_ticks, 0
+        je      M_no_mushroom
+            mov     dx, mushroom_coord
+            mov     cl, dh
+            xor     ch, ch
+            xor     dh, dh
+            mov     al, color_mushroom
+            add     al, 0;8
+            mov     color_mushroom, al
+            call    draw_snake_pixel
+                                    ;xor ah,ah
+                                    ;and al, 0Fh
+                                    ;call print_int2
+        dec     mushroom_ticks
+        cmp     mushroom_ticks, 0
+        jne     M_no_mushroom
+        pusha
+            mov     al, 00h
+            mov     dx, mushroom_coord
+            mov     cl, dh
+            xor     ch, ch
+            xor     dh, dh
+            call    draw_snake_pixel
+        popa
+        M_no_mushroom:
 
     M_key_press:
         ; Обработка нажатия клавиши и присваивания значения переменной direction,
@@ -1106,7 +1184,7 @@ modern              proc
 
         cmp     mushroom_ticks, 0; Если в текущий момент на экране
         jne     M_pass_mushroom ; нет грибов,
-        mov     ax, 10          ; С вероятностью 1/10
+        mov     ax, 1          ; С вероятностью 1/10
         call    randgen         ; сгенерируем грибы
         test    ax, ax
         jnz     M_pass_mushroom
@@ -1142,7 +1220,7 @@ color_poo           db  06h
 color_food           db  0Ah
 color_snake           db  02h
 color_border           db  03h
-color_mushroom          db  0Eh
+color_mushroom          db  0Dh
 color_speed_up           db  0Ch
 color_speed_down          db  0Bh
 
