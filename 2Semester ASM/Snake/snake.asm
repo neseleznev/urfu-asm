@@ -682,6 +682,7 @@ menu                proc
         ; Esc - восстановить игру
         mov     ax, 0500h           ; Сменить страницу на #0
         int     10h                 ; т.е. вернуться к игровому полю
+        mov     ax, current_game
         jmp     menu_end
      menu_not_esc:
         cmp     ah, 50h
@@ -768,13 +769,15 @@ classic_init        proc
     ; Бортик и змейка
         call    draw_border
         call    init_snake
-    ; Координаты головы, хвоста, направление, перва еда
+    ; Координаты головы, хвоста, направление, первая еда
         mov     si, score
         dec     si
         shl     si, 1
         xor     di, di          ;Индекс координаты символа хвоста
         mov     direction, 0100h;direction для управления головой. dir[0] - приращение координаты x (1 или -1), dir[1] - y (1 или -1) 
         mov     food_eaten, 0
+        mov     bx, 0FFFFh
+        call    reprogram_pit
 
         mov     al, color_food
         ;mov     cx, 0800h
@@ -1184,7 +1187,7 @@ modern              proc
 
         cmp     mushroom_ticks, 0; Если в текущий момент на экране
         jne     M_pass_mushroom ; нет грибов,
-        mov     ax, 1          ; С вероятностью 1/10
+        mov     ax, 10          ; С вероятностью 1/10
         call    randgen         ; сгенерируем грибы
         test    ax, ax
         jnz     M_pass_mushroom
@@ -1192,7 +1195,7 @@ modern              proc
             call    add_food
             mov     dh, cl
             mov     mushroom_coord, dx
-            mov     mushroom_ticks, 500
+            mov     mushroom_ticks, 10
         M_pass_mushroom:
         jmp     modern_main
 modern              endp
