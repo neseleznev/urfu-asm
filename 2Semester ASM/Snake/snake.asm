@@ -16,34 +16,10 @@ ORG 100h
 
 @entry:     jmp   @start
 
-include SexyPrnt.inc
+;include SexyPrnt.inc
 include Sound.inc
 
-;catch_09h:
-    ;pusha
-    ;    in      al, 60h             ; скан-код последней нажатой (из 60 порта)
-    ;
-    ;    mov     di,     tail
-    ;    mov     buffer[di], al
-    ;    inc     tail
-    ;    and     tail,   0Fh
-    ;    mov     ax,     tail
-    ;    cmp     head,   ax
-    ;    jne     @catch_09h_put
-    ;    inc     head
-    ;    and     head,   0Fh
-    ;
-    ;@catch_09h_put:
-    ;    in      al,     61h
-    ;    or      al,     80h
-    ;    out     61h,    al
-    ;    and     al,     07Fh
-    ;    out     61h,    al
-    ;    mov     al,     20h
-    ;    out     20h,    al          ; аппаратному контроллеру нужен сигнал ....
-    ;popa
-    ;iret
-
+; Utils
 randgen             proc
     ; ax = Конец диапазона [0...ax]
         or      ax, ax      ; range value != 0
@@ -92,46 +68,117 @@ randgen             endp
 print_int_3chars    proc
     ; Вход: ax - число
     pusha
-    PiVM_next:
+    Pi3C_next:
         mov     bx, 10
         mov     cx, 3
-        int9_bite_off:
+        Pi3C_bite_off:
             xor     dx, dx
             div     bx          ; ax = ax / 10
             push    dx          ; dx = ax % 10
-        loop    int9_bite_off
+        loop    Pi3C_bite_off
 
         mov     ah, 02h
         mov     cx, 3
-        int9_print_digit:
+        Pi3C_print_digit:
             pop     dx
             add     dl, '0'
             int     21h
-        loop    int9_print_digit
+        loop    Pi3C_print_digit
     popa
     ret
 print_int_3chars    endp
 
-;delay              proc
-    ;
-    ;pusha
-    ;    mov     ah, 0
-    ;    int     1Ah
-    ;    add     dx, 2
-    ;    mov     bx, dx
-    ;delay_loop:   
-    ;    int     1Ah
-    ;    cmp     dx, bx
-    ;    jl      delay_loop
-    ;popa
-    ;ret
-;delay              endp
+; Graphics
+draw_border         proc
+    mov     ah, 0Ch         ; Function Draw Pixel
+    mov     al, color_border         
+    xor     bh, bh          ; Page 0
+    mov     dx, 15          ; y coord
 
+    mov     cx, 640*8 + 7   ; x coord = [8 строк](640*8) - 1 + [Для левой границы](8)
+    DB_topEZ:
+        int     10h
+        loop DB_topEZ
+    int     10h             ; Самый первый пиксель (Потому что cx=0 break)
 
+    mov     dx, 350 - 15 - 8; y coord
+    mov     cx, 640*8 - 1   ; x coord = [8 строк](640*8) - 1
+    DB_bottomEZ:
+        int     10h
+        loop    DB_bottomEZ
+    int     10h
+
+    mov     dx, 15 + 8          ; y (15 + 8top)
+    DB_left_right_yEZ:
+        mov     cx, 640 - 8
+        DB_left_right_xEZ:
+            int     10h
+            inc     cx
+            cmp     cx, 640 + 8
+            jl      DB_left_right_xEZ
+
+        inc     dx
+        cmp     dx, 350 - 15 - 8
+        jl      DB_left_right_yEZ
+
+    ret
+draw_border         endp
+
+convert_cxdx_to_pixels proc
+    ; [78]x[38] -> pixels[640]x[350]
+        inc     cx
+        inc     dx
+        shl     cx, 3           ; cx*8 (ширина ячейки)
+        shl     dx, 3           ; аналогично
+        add     dx, 15          ; отступ для текста и прочего
+        ;add     cx, 8 коммент
+        ;add     dx, 8 в пользу inc перед умножением на 8 (выше)
+    ret
+convert_cxdx_to_pixels endp
+
+draw_snake_pixel    proc
+    ; Вход: cx - x координата
+    ;       dx - y координата
+    ;       al - цвет
+    pusha
+        mov     ah, 0Ch
+        xor     bh, bh
+        call    convert_cxdx_to_pixels
+
+        mov     si, 7       ; Цикл по x
+        DSP_x:
+            add     cx, si
+            mov     di, 7       ; Цикл по y
+            DSP_y:
+                add     dx, di
+                int 10h
+                sub     dx, di
+                dec     di
+                test    di, di
+                jns     DSP_y   ; di >= 0
+            sub     cx, si
+            dec     si
+            test    si, si
+            jns     DSP_x   ; si >= 0
+    popa
+    ret
+draw_snake_pixel    endp
+
+init_snake          proc
+    mov     al, color_snake
+    mov     cx, 2
+    mov     dx, 0
+    IS:
+        call    draw_snake_pixel
+        loop    IS
+    ret
+init_snake          endp
+
+; Logic
 add_food            proc
     ; Вход: al - цвет
     push ax
-        mov     ax, 78         ; Псевдо-рандомное число
+        mov     ax, 78          ; Псевдо-рандомное число
         call    randgen         ; от 0 до 78
         mov     cx, ax          ; Запись координаты x
  
@@ -140,18 +187,14 @@ add_food            proc
         mov     dx, ax          ; Запись координаты y
 
         ;Проверяем пустое ли место
-        mov     ah, 0Dh         ; Read Pixel
-        xor     bh, bh          ; Page 0
-        push cx
-        push dx
-        shl     cx, 3       ; cx*8 (ширина ячейки)
-        shl     dx, 3       ; аналогично
-        add     dx, 15      ; отступ для текста и прочего
-        add     cx, 8
-        add     dx, 8
-        int     10h         ; Преобразовываем координаты в экранные и спрашиваем цвет пикселя
-        pop dx
-        pop cx
+        push    cx
+        push    dx
+            mov     ah, 0Dh      ; Read Pixel
+            xor     bh, bh       ; Page 0
+            call    convert_cxdx_to_pixels
+            int     10h         ; Преобразовываем координаты в экранные и спрашиваем цвет пикселя
+        pop     dx
+        pop     cx
 
         cmp     al, color_poo     ; Кака
         je      AF_collision
@@ -164,14 +207,11 @@ add_food            proc
 
     pop ax
         call    draw_snake_pixel
-        jmp     AF_end
+        ret
     AF_collision:
         pop ax
         jmp     add_food
-    AF_end:
-    ret
 add_food            endp
-
 
 check_head_position proc
     ; Проверить, что находится на желаемой для головы позиции,
@@ -187,20 +227,14 @@ check_head_position proc
         cmp     dx, 38
         jge     CHP_exit
     ; Проверяем символы
-        mov     ah, 0Dh         ; Read Pixel
-        xor     bh, bh
-        push cx
-        push dx
-        inc     cx
-        inc     dx
-        shl     cx, 3           ; cx*8 (ширина ячейки)
-        shl     dx, 3           ; аналогично
-        add     dx, 15          ; отступ для текста и прочего
-        ;add     cx, 8 коммент
-        ;add     dx, 8 в пользу inc перед умножением на 8 (выше)
-        int     10h
-        pop dx
-        pop cx
+        push    cx
+        push    dx
+            mov     ah, 0Dh
+            xor     bh, bh
+            call    convert_cxdx_to_pixels
+            int     10h
+        pop     dx
+        pop     cx
         
         cmp     al, color_food       ; Яблоко
         je      CHP_food
@@ -367,142 +401,7 @@ terminate_program   proc
         ret
 terminate_program   endp
 
-draw_border         proc
-    mov     ah, 0Ch         ; Function Draw Pixel
-    mov     al, color_border         
-    xor     bh, bh          ; Page 0
-    mov     dx, 15          ; y coord
-
-    mov     cx, 640*8 + 7   ; x coord = [8 строк](640*8) - 1 + [Для левой границы](8)
-    DB_topEZ:
-        int     10h
-        loop DB_topEZ
-    int     10h             ; Самый первый пиксель (Потому что cx=0 break)
-
-    mov     dx, 350 - 15 - 8; y coord
-    mov     cx, 640*8 - 1   ; x coord = [8 строк](640*8) - 1
-    DB_bottomEZ:
-        int     10h
-        loop    DB_bottomEZ
-    int     10h
-
-    mov     dx, 15 + 8          ; y (15 + 8top)
-    DB_left_right_yEZ:
-        mov     cx, 640 - 8
-        DB_left_right_xEZ:
-            int     10h
-            inc     cx
-            cmp     cx, 640 + 8
-            jl      DB_left_right_xEZ
-
-        inc     dx
-        cmp     dx, 350 - 15 - 8
-        jl      DB_left_right_yEZ
-
-    ret
-draw_border         endp
-
-
-draw_snake_pixel    proc
-    ; Вход: cx - x координата
-    ;       dx - y координата
-    ;       al - цвет
-    pusha
-        shl     cx, 3       ; cx*8 (ширина ячейки)
-        shl     dx, 3       ; аналогично
-        add     dx, 15      ; отступ для текста и прочего
-
-        add     cx, 8
-        add     dx, 8
-
-        mov     ah, 0Ch
-        xor     bh, bh
-
-        mov     si, 7       ; Цикл по x
-        DSP_x:
-            add     cx, si
-            mov     di, 7       ; Цикл по y
-            DSP_y:
-                add     dx, di
-                int 10h
-                sub     dx, di
-                dec     di
-                test    di, di
-                jns     DSP_y   ; di >= 0
-            sub     cx, si
-            dec     si
-            test    si, si
-            jns     DSP_x   ; si >= 0
-    popa
-    ret
-draw_snake_pixel    endp
-
-init_snake          proc
-    mov     al, color_snake
-    mov     cx, 2
-    mov     dx, 0
-    IS:
-        call    draw_snake_pixel
-        loop    IS
-    ret
-init_snake          endp
-
-init_snake2         proc
-    mov     al, color_snake
-    mov     si, score
-    IS2:
-        mov     dx, [snake+si]
-        xor     ch, ch
-        mov     cl, dh
-        xor     dh, dh
-        call    draw_snake_pixel
-        dec si
-        dec si
-        test    si, si
-        jns     IS2
-    ret
-init_snake2         endp
-
-
-@start:
-
-    call    init_play_note
-    mov     bx, 0FFFFh
-    call    reprogram_pit
-
-    mov     ah, 00h             ; Установим текущее значение
-    xor     dh, dh              ; системного таймера как начальный
-    int     1Ah                 ; seed для псевдо-рандома                
-    mov     RND_seed1, dx
-    xor     dh, dh
-    int     1Ah
-    mov     RND_seed2, dx
-
-    mov     ah, 0Fh             ; Сохраним начальные видео-режим
-    int     10h                 ; и отображаемую страницу
-    mov     original_videomode, al
-    mov     original_videopage, bh
-
-    mov     ax, 0010h           ; Переходим в графический режим
-    int     10h                 ; номер 10h
-    ; Установим обработчик INT 09h и сохраним старый
-    ;mov     ax, 3509h
-    ;int     21h
-    ;mov     [old_09h],  bx
-    ;mov     [old_09h+2],es
-    ;mov     ax, 2509h
-    ;mov     dx, offset catch_09h
-    ;cli
-    ;    int     21h
-    ;sti
-    start_loop:
-        call    menu
-        call    ax
-        jmp     start_loop
-    ret
-
 menu                proc
-
     menu_draw:
 
         mov     bh, 1           ; Номер отображаемой страницы (далее всюду)
@@ -659,16 +558,7 @@ menu                proc
         lea     dx, str_resume2
         int     21h
 
-    ; TODO Небольшая задержка - защита от случайного нажатия стрелки
-    mov     ticks, 0
-    menu_delay:               ;Основной цикл
-        cmp     ticks, 5
-        jl      menu_delay
-
     menu_loop:
-        ;mov     di, tail
-        ;mov     ah, buffer[di-1]
-
         mov     ax, 0100h
         int     16h
         jz      menu_loop           ; Без нажатия - ждём еще
@@ -683,13 +573,13 @@ menu                proc
         mov     ax, 0500h           ; Сменить страницу на #0
         int     10h                 ; т.е. вернуться к игровому полю
         mov     ax, current_game
-        jmp     menu_end
+        ret
      menu_not_esc:
         cmp     ah, 50h
         jne     menu_not_d
         ; Вниз - выход
         mov     ax, offset terminate_program
-        jmp     menu_end
+        ret
      menu_not_d:
         cmp     ah, 48h
         jne     menu_not_ud
@@ -699,7 +589,7 @@ menu                proc
         mov     [snake+0], 0100h
         mov     [snake+2], 0200h
         mov     ax, offset classic   ; game
-        jmp     menu_end
+        ret
      menu_not_ud:
         cmp     ah, 4Bh
         jne     menu_not_udl
@@ -709,7 +599,7 @@ menu                proc
         mov     [snake+0], 0100h
         mov     [snake+2], 0200h
         mov     ax, offset modern    ; game
-        jmp     menu_end
+        ret
      menu_not_udl:
         cmp     ah, 4Dh
         je      menu_r
@@ -717,9 +607,6 @@ menu                proc
      menu_r:
         ; Вправо
         mov     ax, offset terminate_program
-        jmp     menu_end
-
-    menu_end:
         ret
 menu                endp
 
@@ -786,18 +673,15 @@ classic_init        proc
         ;loop    debug_superfood
         mov     game_in_progress, 1
         mov     current_game, offset classic
-    ret
+        ret
 classic_init        endp
 
 classic             proc
-    ;
-    ;
     cmp     game_in_progress, 1
     je      classic_main
+    call    classic_init
 
-    call classic_init
-
-    classic_main:               ;Основной цикл
+    classic_main:
         cmp     ticks, 2
         jl      classic_main
         mov     ticks, 0
@@ -899,7 +783,7 @@ classic             proc
         inc     di
         and     di, 0FFh
         jmp     classic_main
-    ret
+        ret
 classic             endp
 
 
@@ -977,18 +861,15 @@ modern_init         proc
         ;loop    debug_superfood
         mov     game_in_progress, 1
         mov     current_game, offset modern
-    ret
+        ret
 modern_init         endp
 
 modern              proc
-    ;
-    ;
     cmp     game_in_progress, 1
     je      modern_main
+    call    modern_init
 
-    call modern_init
-
-    modern_main:               ;Основной цикл
+    modern_main:
         cmp     ticks, 2
         jl      modern_main
         mov     ticks, 0
@@ -1200,6 +1081,34 @@ modern              proc
         jmp     modern_main
 modern              endp
 
+@start:
+
+    call    init_play_note
+    mov     bx, 0FFFFh
+    call    reprogram_pit
+
+    mov     ah, 00h             ; Установим текущее значение
+    xor     dh, dh              ; системного таймера как начальный
+    int     1Ah                 ; seed для псевдо-рандома                
+    mov     RND_seed1, dx
+    xor     dh, dh
+    int     1Ah
+    mov     RND_seed2, dx
+
+    mov     ah, 0Fh             ; Сохраним начальные видео-режим
+    int     10h                 ; и отображаемую страницу
+    mov     original_videomode, al
+    mov     original_videopage, bh
+
+    mov     ax, 0010h           ; Переходим в графический режим
+    int     10h                 ; номер 10h
+
+    start_loop:
+        call    menu
+        call    ax
+        jmp     start_loop
+    ret
+
 
 original_videomode  db  ?
 original_videopage  db  ?
@@ -1260,11 +1169,5 @@ str_hotkey_len      db  $-str_hotkey
 RND_const           dw  8405h         ; multiplier value
 RND_seed1           dw  ?
 RND_seed2           dw  ?             ; random number seeds
-
-;buffer      db      10h dup (?) 
-;head        dw      0
-;tail        dw      0
-;old_09h     dw      ?, ?
-
 
 end	    @entry
