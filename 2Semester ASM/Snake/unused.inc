@@ -194,37 +194,18 @@ check_head_position proc
 check_head_position endp
 
 
-draw_border         proc
-    mov     ah, 0Ch         ; Draw Pixel
-    mov     al, color_border         
-    xor     bh, bh          ; Page 0
-    mov     dx, 15          ; y coord
-
-    mov     cx, 640*10 + 9   ; x coord = [10 строк](640*10) - 1 + [Для левой границы](10)
-    DB_top:
-        int     10h
-        loop DB_top
-    int     10h             ; Самый первый пиксель (Потому что cx=0 break)
-
-    mov     dx, 350 - 15 - 10; y coord
-    mov     cx, 640*10 - 1   ; x coord = [10 строк](640*10) - 1
-    DB_bottom:
-        int     10h
-        loop    DB_bottom
-    int     10h
-
-    mov     dx, 15 + 10          ; y (15 + 10top)
-    DB_left_right_y:
-        mov     cx, 640 - 10
-        DB_left_right_x:
-            int     10h
-            inc     cx
-            cmp     cx, 640 + 10
-            jl      DB_left_right_x
-
-        inc     dx
-        cmp     dx, 350 - 15 - 10
-        jl      DB_left_right_y
+init_snake2         proc
+    mov     al, color_snake
+    mov     si, score
+    IS2:
+        mov     dx, [snake+si]
+        xor     ch, ch
+        mov     cl, dh
+        xor     dh, dh
+        call    draw_snake_pixel
+        dec si
+        dec si
+        test    si, si
+        jns     IS2
     ret
-draw_border         endp
-
+init_snake2         endp
