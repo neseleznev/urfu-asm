@@ -7,7 +7,7 @@ ORG 100h
 
 ; Переменные
 game_over           db  0
-score               dw  2
+score               dw  0
 snake               dw  100h  dup('?')
 direction           dw  0100h         ; xx;yy
 ; Константы-цвета
@@ -15,10 +15,8 @@ color_food          db  02h
 color_snake         db  0Eh
 color_border        db  07h 
 ; Строки вместе с длинами
-str_resume          db  'PAUSE (Space - Resume game)','$'
-str_resume_len      db  $-str_resume
-str_gameover        db  '[F2 - New game] GAME OVER (Your score ','$'
-str_gameover_len    db  $-str_gameover
+str_resume          db  '                           PAUSE (Space - Resume game)','$'
+str_gameover        db  '                   [F2 - New game] GAME OVER. Your score ','$'
 str_help_game       db  'Score ___ | Space - menu | Esc - exit','$'
 ; Переменные для псевдо-рандома
 RND_const           dw  8405h         ; multiplier value
@@ -37,7 +35,7 @@ catch_1Ch:
     iret
 
 randgen             proc
-    ; ax = Конец диапазона [0...ax]
+    ; ax = Конец диапазона [0...ax)
         or      ax, ax      ; range value != 0
         jz      RND_end
         push bx
@@ -50,9 +48,7 @@ randgen             proc
         mov     bx, RND_seed2;load seeds
         mov     cx, ax      ; save seed
         mul     RND_const
-        shl     cx, 1
-        shl     cx, 1
-        shl     cx, 1
+        shl     cx, 3
         add     ch, cl
         add     dx, cx
         add     dx, bx
@@ -266,7 +262,6 @@ check_head_position proc
         mov     dx, 6
         int     10h
         mov     ax, score
-        sub     ax, 2
         call    print_int
 
         call    new_food
@@ -275,6 +270,97 @@ check_head_position proc
         ret
 check_head_position endp
 
+handle_keyboard     proc
+    ; Обработка нажатия клавиши и присваивания значения переменной direction,
+    ; отвечающей за направление головы. Управление стрелками.
+    ; Результат: direction = 0, если нужно делать ret из игры (было наажтие Esc)
+        pusha
+            mov     ax, 0100h
+            int     16h
+            jnz     KP_check           ; Без нажатия выходим
+            popa
+            ret
+
+        KP_check:
+            mov     cx, direction
+            xor     ah, ah
+            int     16h
+
+            cmp     ah, 50h
+            je      KP_down
+            cmp     ah, 48h
+            je      KP_up
+            cmp     ah, 4Bh
+            je      KP_left
+            cmp     ah, 4Dh
+            je      KP_right
+            cmp     ah, 39h          ; Если это нажатие клавиши Space
+            je      KP_pause         ; пауза
+            cmp     ah, 1h           ; Если это нажатие клавиши Esc
+            je      KP_exit          ; выход
+            jmp     KP_end
+
+         KP_pause:
+            mov     ah, 02h        
+            xor     bx, bx       
+            mov     dh, 24
+            xor     dl, dl
+            int     10h
+            mov     ah, 09h         
+            lea     dx, str_resume
+            int     21h
+            
+            mov     ax, 0100h
+            int     16h
+            jz      KP_pause          ; Без нажатия - ждём
+            xor     ah, ah
+            int     16h
+
+            cmp     ah, 1h           ; Если это нажатие клавиши Esc
+            je      KP_exit          ; выход
+            cmp     ah, 39h          ; Если это не пробел
+            jne     KP_pause         ; ждём дальше
+
+            push    cx
+            mov     ah, 02h  ; Установить курсор
+            xor     bx, bx   ; bh номер страницы, bl цвет
+            mov     dh, 24   ; dh y, dl x
+            xor     dl, dl
+            int     10h
+            mov     ah, 09h              ; писать символ
+            mov     al, ' '
+            mov     cx, 80   ; Сколько раз
+            int     10h
+            pop     cx
+            jmp     KP_end
+
+         KP_down:
+            cmp     cx, 0FFFFh      ; Сравниваем чтобы не пойти на себя
+            je      KP_end
+            mov     cx, 0001h       ; Вниз => x 0, y 1
+            jmp     KP_end
+         KP_up:
+            cmp     cx, 0001h
+            je      KP_end
+            mov     cx, 0FFFFh      ; Вверх => x 0, y -1
+            jmp     KP_end
+         KP_left:
+            cmp     cx, 0100h
+            je      KP_end
+            mov     cx, 0FF00h      ; Влево => x -1, y 0
+            jmp     KP_end
+         KP_right:
+            cmp     cx, 0FF00h
+            je      KP_end
+            mov     cx, 0100h       ; Вправо => x 1, y 0
+            jmp     KP_end
+        KP_exit:
+            xor     cx, cx
+        KP_end:
+            mov     direction, cx
+        popa
+        ret
+handle_keyboard     endp
 
 game             proc
     game_init:
@@ -282,10 +368,10 @@ game             proc
         mov     ax, 0010h
         int     10h
         ; Счёт, начальное положение змейки, указатели головы и хвоста, направление, первая еда
-        mov     score, 2
+        mov     score, 0
         mov     [snake+0], 0110h
         mov     [snake+2], 0210h
-        mov     si, score
+        mov     si, 2
         xor     di, di          ; Индекс координаты символа хвоста
         mov     direction, 0100h; direction для управления головой
 
@@ -303,7 +389,6 @@ game             proc
         mov     dx, 6
         int     10h
         mov     ax, score
-        sub     ax, 2
         call    print_int
 
         ; Бортик и змейка
@@ -320,89 +405,10 @@ game             proc
         jl      game_main
         mov     ticks, 0
 
-    keyboard:
-        ; Обработка нажатия клавиши и присваивания значения переменной direction,
-        ; отвечающей за направление головы. Управление стрелками.
-        pusha
-            mov     cx, direction
-            mov     ax, 0100h
-            int     16h
-            jz      KP_end           ; Без нажатия выходим
-            xor     ah, ah
-            int     16h
-
-            cmp     ah, 81h           ; Если это нажатие клавиши Esc
-            je      KP_exit          ; выход
-            cmp     ah, 39h          ; Если это нажатие клавиши Space
-            je      KP_pause         ; пауза
-            cmp     ah, 50h
-            je      KP_down
-            cmp     ah, 48h
-            je      KP_up
-            cmp     ah, 4Bh
-            je      KP_left
-            cmp     ah, 4Dh
-            je      KP_right
-            jmp     KP_end
-
-            KP_pause:
-                        mov     ah, 02h         
-                        mov     dl, str_resume_len 
-                        shr     dl, 1           
-                        neg     dl              
-                        add     dl, 40          
-                        mov     dh, 24
-                        int     10h
-                        mov     ah, 09h         
-                        lea     dx, str_resume
-                        int     21h
-            mov     ax, 0100h
-            int     16h
-            jz      KP_pause          ; Без нажатия - ждём
-            xor     ah, ah
-            int     16h
-
-            cmp     ah, 1h           ; Если это нажатие клавиши Esc
-            je      KP_exit          ; выход
-            cmp     ah, 39h          ; Если это не пробел
-            jne     KP_pause         ; ждём дальше
-
-                    ;mov     ah, 02h  ; Установить курсор
-                    ;mov     bx, 0100h; bh номер страницы, bl цвет
-                    ;mov     dx, 24   ; dh x, dl y
-                   ; int     10h
-                    ;mov     ah, 09h              ; писать символ
-                   ; mov     al, ' '
-                   ; mov     cx, 25   ; Сколько раз
-                   ; int     10h
-            jmp     KP_end
-
-            KP_down:
-            cmp     cx, 0FFFFh      ; Сравниваем чтобы не пойти на себя
-            je      KP_end
-            mov     cx, 0001h       ; Вниз => x 0, y 1
-            jmp     KP_end
-            KP_up:
-            cmp     cx, 0001h
-            je      KP_end
-            mov     cx, 0FFFFh      ; Вверх => x 0, y -1
-            jmp     KP_end
-            KP_left:
-            cmp     cx, 0100h
-            je      KP_end
-            mov     cx, 0FF00h      ; Влево => x -1, y 0
-            jmp     KP_end
-            KP_right:
-            cmp     cx, 0FF00h
-            je      KP_end
-            mov     cx, 0100h       ; Вправо => x 1, y 0
-            jmp     KP_end
-            KP_exit:
-                popa
-                ret
-            KP_end:
-                mov     direction, cx
-        popa
+    call    handle_keyboard
+    cmp     direction, 0
+    jne     change_head
+    ret
 
     change_head:
         mov     dx, [snake+si]      ;Берем координату головы из памяти
@@ -453,9 +459,7 @@ game             endp
     mov     [old_1Ch+2],es
     mov     ax, 251Ch
     mov     dx, offset catch_1Ch
-    cli
-        int     21h
-    sti
+    int     21h
 
     mov     ah, 00h             ; Установим текущее значение системного таймера как начальный
     int     1Ah                 ; seed для псевдо-рандома                
@@ -466,35 +470,24 @@ game             endp
     mov     videomode, al
     mov     videopage, bh
 
-    mov     ax, 0010h           ; Переходим в графический режим
-    int     10h                 ; номер 10h
-
     new_game:
-    mov     game_over, 0
-    call    game
+        mov     game_over, 0
+        call    game
 
     cmp     game_over, 0
     je      terminate_program
 
-        ; GAME OVER
+    game_over_lbl:
         mov     ah, 02h         
-        mov     dl, str_gameover_len 
-        shr     dl, 1           
-        neg     dl              
-        add     dl, 40          
         mov     dh, 24
+        xor     dl, dl
         int     10h
         mov     ah, 09h         
         lea     dx, str_gameover
         int     21h
 
         mov     ax, score
-        sub     ax, 2
         call    print_int
-
-        mov     ah, 02h
-        mov     dl, ')'
-        int     21h
 
         game_over_loop:
             mov     ax, 0100h
@@ -510,26 +503,20 @@ game             endp
             jmp     game_over_loop
 
     terminate_program:
-    ; Завершение работы программы
-    mov     ax, 0010h
-    int     10h
-    ; Восстанавливаем видео-режим
-    mov     ah, 00h
-    mov     al, videomode
-    int     10h
-    mov     ah, 05h
-    mov     al, videopage
-    int     10h
-    ; Восстанавливаем вектор 1Ch
-    mov     ax, 251Ch
-    mov     dx, word ptr cs:[old_1Ch]
-    push    ds
-    mov     ds, word ptr cs:[old_1Ch+2]
-    cli
+        ; Завершение работы программы
+        mov     ax, 0010h
+        int     10h
+        ; Восстанавливаем видео-режим
+        xor     ah, ah
+        mov     al, videomode
+        int     10h
+        mov     ah, 05h
+        mov     al, videopage
+        int     10h
+        ; Восстанавливаем вектор 1Ch
+        mov     ax, 251Ch
+        lds     dx, dword ptr cs:[old_1Ch]
         int     21h
-    sti
-
-    mov     ax, 4C00h
-    int     21h
+    ret
 
 end     @entry
