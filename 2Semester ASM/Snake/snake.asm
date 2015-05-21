@@ -1133,7 +1133,7 @@ color_food           db  0Ah
 color_snake           db  02h
 color_border           db  03h
 color_mushroom          db  0Dh
-color_speed_up           db  0Ch
+color_speed_up           db  0Eh
 color_speed_down          db  0Bh
 
 speed_up_coord      dw  ?
